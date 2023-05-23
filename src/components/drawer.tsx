@@ -15,7 +15,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import Table from './table';
+import Table, { Room } from './table';
 
 import io from 'socket.io-client';
 import { feathers } from '@feathersjs/feathers';
@@ -36,7 +36,7 @@ client.configure(authentication());
 const drawerWidth = 240;
 
 interface Props {
-  username: string;
+	username: string;
 }
 
 export default function ResponsiveDrawer(props: Props) {
@@ -56,7 +56,7 @@ export default function ResponsiveDrawer(props: Props) {
 				<ListItem key={'{username}'} disablePadding>
 					<ListItemButton>
 
-						<ListItemText primary={`Logged in as [${ username }]`} />
+						<ListItemText primary={`Logged in as [${username}]`} />
 					</ListItemButton>
 				</ListItem>
 				<ListItem key={'Logout'} disablePadding onClick={
@@ -78,7 +78,30 @@ export default function ResponsiveDrawer(props: Props) {
 			<Divider />
 			<List>
 				{[ 'Dashboard', 'Tenants', 'Users', 'RoomServer', 'RoomClient', 'Media node(s)' ].map((text, index) => (
-					<ListItem key={text} disablePadding>
+					<ListItem key={text} disablePadding onClick={async () => {
+						await client.reAuthenticate();
+
+						// Find all users
+						const users = await client.service('rooms').find();
+
+						// eslint-disable-next-line no-console
+						console.log(users);
+
+						try {
+							const log = await client.service('rooms').create(
+								{ name: 'test2', description: 'testdesc3', maxActiveVideos: 4 }
+							);
+
+							// eslint-disable-next-line no-console
+							console.log(log);
+						} catch (error) {
+							// Show login page (potentially with `e.message`)
+							// eslint-disable-next-line no-console
+							console.log(error);
+							// if data already exists we cant add it TODO
+						}
+
+					}}>
 						<ListItemButton>
 							<ListItemIcon>
 								{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
@@ -106,6 +129,29 @@ export default function ResponsiveDrawer(props: Props) {
 
 	const container = window !== undefined ? () => window.document.body : undefined;
 
+	function getData(): Room[] {
+		const data: Room[] = [ {
+			id: 1,
+			name: 'test1',
+			description: 'testdesc',
+			createdAt: '1684241830848',
+			updatedAt: '1684241830849',
+			creatorId: '2',
+			tenantId: null,
+			logo: null,
+			background: null,
+			maxActiveVideos: 4,
+			locked: true,
+			chatEnabled: true,
+			raiseHandEnabled: true,
+			filesharingEnabled: true,
+			localRecordingEnabled: true,
+			owners: []
+		} ];
+
+		return data;
+	}
+
 	return (
 		<Box sx={{ display: 'flex' }}>
 			<CssBaseline />
@@ -127,7 +173,7 @@ export default function ResponsiveDrawer(props: Props) {
 						<MenuIcon />
 					</IconButton>
 					<Typography variant="h6" noWrap component="div">
-            Responsive drawer
+						Responsive drawer
 					</Typography>
 				</Toolbar>
 			</AppBar>
@@ -169,22 +215,22 @@ export default function ResponsiveDrawer(props: Props) {
 			>
 				<Toolbar />
 				<Typography paragraph>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-          tempor incididunt ut labore et dolore magna aliqua. Rhoncus dolor purus non
-          enim praesent elementum facilisis leo vel. Risus at ultrices mi tempus
-          imperdiet. Semper risus in hendrerit gravida rutrum quisque non tellus.
-          Convallis convallis tellus id interdum velit laoreet id donec ultrices.
-          Odio morbi quis commodo odio aenean sed adipiscing. Amet nisl suscipit
-          adipiscing bibendum est ultricies integer quis. Cursus euismod quis viverra
-          nibh cras. Metus vulputate eu scelerisque felis imperdiet proin fermentum
-          leo. Mauris commodo quis imperdiet massa tincidunt. Cras tincidunt lobortis
-          feugiat vivamus at augue. At augue eget arcu dictum varius duis at
-          consectetur lorem. Velit sed ullamcorper morbi tincidunt. Lorem donec massa
-          sapien faucibus et molestie ac.
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+					tempor incididunt ut labore et dolore magna aliqua. Rhoncus dolor purus non
+					enim praesent elementum facilisis leo vel. Risus at ultrices mi tempus
+					imperdiet. Semper risus in hendrerit gravida rutrum quisque non tellus.
+					Convallis convallis tellus id interdum velit laoreet id donec ultrices.
+					Odio morbi quis commodo odio aenean sed adipiscing. Amet nisl suscipit
+					adipiscing bibendum est ultricies integer quis. Cursus euismod quis viverra
+					nibh cras. Metus vulputate eu scelerisque felis imperdiet proin fermentum
+					leo. Mauris commodo quis imperdiet massa tincidunt. Cras tincidunt lobortis
+					feugiat vivamus at augue. At augue eget arcu dictum varius duis at
+					consectetur lorem. Velit sed ullamcorper morbi tincidunt. Lorem donec massa
+					sapien faucibus et molestie ac.
 				</Typography>
 				<div>
-          Lorem ipsum dolor sit amet:
-					<Table />
+					Lorem ipsum dolor sit amet:
+					<Table data={getData()} />
 				</div>
 			</Box>
 

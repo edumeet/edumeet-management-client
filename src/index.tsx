@@ -4,6 +4,7 @@ import './index.css';
 import Drawer from './components/drawer';
 
 import LoginPage from './components/loginPage';
+import RegisterPage from './components/RegisterPage';
 
 import io from 'socket.io-client';
 import { feathers } from '@feathersjs/feathers';
@@ -45,6 +46,7 @@ async function main(): Promise<void> {
 		// console.log('showLoginPage()');
 		root.render(
 			<React.StrictMode>
+				<RegisterPage />
 				<LoginPage />
 			</React.StrictMode>
 		);

@@ -8,7 +8,7 @@ import authentication from '@feathersjs/authentication-client';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { FormControl, FormLabel } from '@mui/material';
-import edumeetConfig from '../utils/edumeetConfig';
+import edumeetConfig from '../../utils/edumeetConfig';
 
 const serverApiUrl = edumeetConfig.serverApiUrl;
 
@@ -23,7 +23,7 @@ client.configure(authentication());
 
 const drawerWidth = 20;
 
-function LoginPage() {
+function RoomPage() {
 	return (
 		<Box
 			component="main"
@@ -66,4 +66,4 @@ function LoginPage() {
 		</Box>
 	);
 }
-export default LoginPage;
+export default RoomPage;

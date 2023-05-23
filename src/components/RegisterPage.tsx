@@ -23,30 +23,46 @@ client.configure(authentication());
 
 const drawerWidth = 20;
 
-function LoginPage() {
+function RegisterPage() {
 	return (
 		<Box
 			component="main"
 			sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
 		>
+
 			<form
 				// ref={formRef}
 				onSubmit={async (e: React.SyntheticEvent) => {
 					e.preventDefault();
 					const target = e.target as typeof e.target & {
-                        email: { value: string };
-                        password: { value: string };
-                    };
+						email: { value: string };
+						password: { value: string };
+					};
 					const email = target.email.value; // typechecks!
 					const password = target.password.value; // typechecks!
 
 					try {
-						// Authenticate with the local email/password strategy
-						await client.authenticate({
-							strategy: 'local',
+						const credentials = {
 							email: email,
 							password: password
-						});
+						};
+
+						// Authenticate with the local email/password strategy
+
+						await client.service('users').create(credentials);
+
+						// If successful log them in
+						if (!credentials) {
+							// Try to authenticate using an existing token
+							await client.reAuthenticate();
+						} else {
+							// Otherwise log in with the `local` strategy using the credentials we got
+							await client.authenticate({
+								strategy: 'local',
+								...credentials
+							});
+						}
+
 						// Show e.g. logged in dashboard page
 						window.location.reload();
 					} catch (error) {
@@ -54,8 +70,9 @@ function LoginPage() {
 					}
 				}}
 			>
+
 				<FormControl>
-					<h3>Login page</h3>
+					<h3>Register page</h3>
 					<FormLabel>Enter Email</FormLabel>
 					<TextField name='email' type="email"></TextField>
 					<FormLabel>Password</FormLabel>
@@ -66,4 +83,4 @@ function LoginPage() {
 		</Box>
 	);
 }
-export default LoginPage;
+export default RegisterPage;
