@@ -10,9 +10,7 @@ import Button from '@mui/material/Button';
 import { FormControl, FormLabel } from '@mui/material';
 import edumeetConfig from '../utils/edumeetConfig';
 
-const serverApiUrl = edumeetConfig.serverApiUrl;
-
-const socket = io(serverApiUrl);
+const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 // Initialize our Feathers client application through Socket.io
 // with hooks and authentication.
 const client = feathers();

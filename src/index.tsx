@@ -12,14 +12,16 @@ import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from './utils/edumeetConfig';
 
-const serverApiUrl = edumeetConfig.serverApiUrl;
 // const hostname = edumeetConfig.server_hostname || window.location.hostname;
+// edumeetConfig.hostname = edumeetConfig.hostname || window.location.hostname;
+// edumeetConfig.path = window.config?.path || edumeetConfig.path;
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-const socket = io(serverApiUrl);
+const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
+
 // Initialize our Feathers client application through Socket.io
 // with hooks and authentication.
 const client = feathers();
@@ -30,11 +32,19 @@ client.configure(authentication());
 
 async function main(): Promise<void> {
 	try {
+		// eslint-disable-next-line no-console
+		console.log('user.email');
+
 		const { user } = await client.reAuthenticate();
+
+		// const { user } = await client.reAuthenticate();
 
 		// console.log('showDashboard()');
     
-		// console.log(user.email);
+		// eslint-disable-next-line no-console
+		console.log(user.email);
+		// eslint-disable-next-line no-console
+		// console.log('user.email2');
 
 		root.render(
 			<React.StrictMode>
@@ -43,6 +53,8 @@ async function main(): Promise<void> {
 		);
     
 	} catch (error) {
+		// eslint-disable-next-line no-console
+		console.log(error);
 		// console.log('showLoginPage()');
 		root.render(
 			<React.StrictMode>

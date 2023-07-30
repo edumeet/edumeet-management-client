@@ -6,9 +6,10 @@ import io from 'socket.io-client';
 import { feathers } from '@feathersjs/feathers';
 import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
-import edumeetConfig from '../utils/edumeetConfig';
+import edumeetConfig from '../../utils/edumeetConfig';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
+
 // Initialize our Feathers client application through Socket.io
 // with hooks and authentication.
 const client = feathers();
@@ -17,38 +18,29 @@ client.configure(socketio(socket));
 // Use localStorage to store our login token
 client.configure(authentication());
 
-export type Room = {
+type User = {
+
 	id: number,
-	name: string,
-	description: string,
-	createdAt: string,
-	updatedAt: string,
-	creatorId: string,
-	tenantId?: number | null,
-	logo: string | null,
-	background: string | null,
-	maxActiveVideos: number,
-	locked: boolean,
-	chatEnabled: boolean,
-	raiseHandEnabled: boolean,
-	filesharingEnabled: boolean,
-	localRecordingEnabled: boolean,
-	owners: []
+    ssoId: string,
+    tenantId: number,
+    email: string,
+    name: string,
+    avatar: string,
+    roles: [],
+    tenantAdmin: boolean,
+    tenantOwner: boolean
+    
 };
 
 // nested data is ok, see accessorKeys in ColumnDef below
 
-interface Props {
-	data: Room[];
-}
-
-const Table = (props: Props) => {
+const UserTable = () => {
 
 	// const { data } = props;
 
 	// should be memoized or stable
 	// eslint-disable-next-line camelcase
-	const columns = useMemo<MRT_ColumnDef<Room>[]>(
+	const columns = useMemo<MRT_ColumnDef<User>[]>(
 		() => [
 
 			{
@@ -56,64 +48,36 @@ const Table = (props: Props) => {
 				header: 'id'
 			},
 			{
-				accessorKey: 'name',
-				header: 'Name'
-			},
-			{
-				accessorKey: 'description',
-				header: 'Desc'
-			},
-			{
-				accessorKey: 'createdAt',
-				header: 'Created at'
-			},
-			{
-				accessorKey: 'updatedAt',
-				header: 'Updated at'
-			},
-			{
-				accessorKey: 'creatorId',
-				header: 'Creator id'
+				accessorKey: 'ssoId',
+				header: 'ssoId'
 			},
 			{
 				accessorKey: 'tenantId',
-				header: 'Tenant id'
+				header: 'tenantId'
 			},
 			{
-				accessorKey: 'logo',
-				header: 'Logo'
+				accessorKey: 'email',
+				header: 'email'
 			},
 			{
-				accessorKey: 'background',
-				header: 'Background'
+				accessorKey: 'name',
+				header: 'name'
 			},
 			{
-				accessorKey: 'maxActiveVideos',
-				header: 'Max Active Videos'
+				accessorKey: 'avatar',
+				header: 'avatar'
 			},
 			{
-				accessorKey: 'locked',
-				header: 'Locked'
+				accessorKey: 'roles',
+				header: 'roles'
 			},
 			{
-				accessorKey: 'chatEnabled',
-				header: 'Chat Enabled'
+				accessorKey: 'tenantAdmin',
+				header: 'tenantAdmin'
 			},
 			{
-				accessorKey: 'raiseHandEnabled',
-				header: 'Raise Hand Enabled'
-			},
-			{
-				accessorKey: 'filesharingEnabled',
-				header: 'Filesharing Enabled'
-			},
-			{
-				accessorKey: 'localRecordingEnabled',
-				header: 'Local Recording Enabled'
-			},
-			{
-				accessorKey: 'owners',
-				header: 'Owners'
+				accessorKey: 'tenantOwner',
+				header: 'tenantOwner'
 			},
 		],
 		[],
@@ -130,21 +94,30 @@ const Table = (props: Props) => {
 			await client.reAuthenticate();
 
 			// Find all users
-			const room = await client.service('rooms').find();
+			const user = await client.service('users').find();
 
-			setData(room.data);
+			// eslint-disable-next-line no-console
+			console.log(user);
+
+			if (user.data.length !== 0) {
+				setData(user.data);
+			}
 			setIsLoading(false);
-	
+
 		}
-	
+
 		fetchProduct();
 	}, []);
 
 	return <MaterialReactTable
 		columns={columns}
 		data={data} // fallback to array if data is undefined
+		initialState={{
+			columnVisibility: {
+			}
+		}}
 		state={{ isLoading }}
 	/>;
 };
 
-export default Table;
+export default UserTable;

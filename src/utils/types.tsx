@@ -2,7 +2,9 @@ import { ThemeOptions } from '@mui/material';
 
 export const defaultEdumeetConfig: EdumeetConfig = {
 	serverApiUrl: 'http://localhost:3030',
-	hostname: undefined,
+	hostname: 'localhost',
+	path: '/mgmt/socket.io',
+	clipath: '/cli/',
 	theme: {
 		background: 'linear-gradient(135deg, rgba(1,42,74,1) 0%, rgba(1,58,99,1) 50%, rgba(1,73,124,1) 100%)',
 		appBarColor: '#313131',
@@ -18,6 +20,8 @@ export const defaultEdumeetConfig: EdumeetConfig = {
 
 export interface EdumeetConfig {
 	serverApiUrl: string;
-	hostname?: string;
+	hostname: string;
+	path: string;
+	clipath: string;
 	theme: ThemeOptions;
 }

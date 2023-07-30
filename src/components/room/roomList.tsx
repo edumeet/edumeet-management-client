@@ -6,9 +6,11 @@ import io from 'socket.io-client';
 import { feathers } from '@feathersjs/feathers';
 import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
-import edumeetConfig from '../utils/edumeetConfig';
+import edumeetConfig from '../../utils/edumeetConfig';
+import BasicModal from './roomEdit';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
+
 // Initialize our Feathers client application through Socket.io
 // with hooks and authentication.
 const client = feathers();
@@ -17,7 +19,8 @@ client.configure(socketio(socket));
 // Use localStorage to store our login token
 client.configure(authentication());
 
-export type Room = {
+type Room = {
+
 	id: number,
 	name: string,
 	description: string,
@@ -33,18 +36,12 @@ export type Room = {
 	raiseHandEnabled: boolean,
 	filesharingEnabled: boolean,
 	localRecordingEnabled: boolean,
-	owners: []
+	// owners: []	
 };
 
 // nested data is ok, see accessorKeys in ColumnDef below
 
-interface Props {
-	data: Room[];
-}
-
-const Table = (props: Props) => {
-
-	// const { data } = props;
+const RoomTable = () => {
 
 	// should be memoized or stable
 	// eslint-disable-next-line camelcase
@@ -89,7 +86,7 @@ const Table = (props: Props) => {
 			},
 			{
 				accessorKey: 'maxActiveVideos',
-				header: 'Max Active Videos'
+				header: 'Max Active Videos',
 			},
 			{
 				accessorKey: 'locked',
@@ -111,10 +108,11 @@ const Table = (props: Props) => {
 				accessorKey: 'localRecordingEnabled',
 				header: 'Local Recording Enabled'
 			},
-			{
+
+			/* {
 				accessorKey: 'owners',
 				header: 'Owners'
-			},
+			}, */
 		],
 		[],
 	);
@@ -132,19 +130,40 @@ const Table = (props: Props) => {
 			// Find all users
 			const room = await client.service('rooms').find();
 
-			setData(room.data);
+			// eslint-disable-next-line no-console
+			console.log(room);
+
+			if (room.data.length !== 0) {
+				setData(room.data);
+			}
 			setIsLoading(false);
-	
+
 		}
-	
+
 		fetchProduct();
 	}, []);
 
-	return <MaterialReactTable
-		columns={columns}
-		data={data} // fallback to array if data is undefined
-		state={{ isLoading }}
-	/>;
+	return <>
+		<BasicModal />
+		<MaterialReactTable
+			columns={columns}
+			data={data} // fallback to array if data is undefined
+			initialState={{
+				columnVisibility: {
+					updatedAt: false,
+					creatorId: false,
+					tenantId: false,
+					logo: false,
+					background: false,
+					maxActiveVideos: false,
+					locked: false,
+					chatEnabled: false,
+					raiseHandEnabled: false,
+					filesharingEnabled: false,
+					localRecordingEnabled: false,
+				}
+			}}
+			state={{ isLoading }} /></>;
 };
 
-export default Table;
+export default RoomTable;
