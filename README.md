@@ -32,5 +32,6 @@ cd edumeet-management-client
 3. Install and run 
 ```bash
 yarn
-yarn start
+# yarn start
+PUBLIC_URL="https://edumeet.example.com/cli" yarn start
 ```

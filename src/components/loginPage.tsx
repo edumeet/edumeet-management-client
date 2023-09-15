@@ -27,7 +27,7 @@ function LoginPage() {
 			component="main"
 			sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
 		>
-				https://edumeet.sth.sze.hu/mgmt/oauth/tenant?tenantId=1
+				https://edumeet.example.com/mgmt/oauth/tenant?tenantId=1
 			<form
 				// ref={formRef}
 				onSubmit={async (e: React.SyntheticEvent) => {

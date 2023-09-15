@@ -17,9 +17,10 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 // import Table, { Room } from './table';
 import RoomTable from './room/roomList';
-import TenantTable from './tenant/tenantList';
-import TenantOAuthTable from './tenant/tenantOAuthList';
-import TenantFQDNsTable from './tenant/TenantFQDNList';
+import TenantPage from './tenant/tenant/tenant';
+
+import TenantFQDNsTable from './tenant/tenantFQDN/tenantFQDN';
+import TenantOauthTable from './tenant/tenantOauth/tenantOauth';
 
 import { BrowserRouter as Router, Route, Link, useParams, Routes } from 'react-router-dom';
 import LoginLayout from './test/test';
@@ -132,40 +133,6 @@ export default function ResponsiveDrawer(props: Props) {
 						<ListItemText primary={'Users'} />
 					</ListItemButton>
 				</ListItem>
-
-				{[ 'RoomServer', 'RoomClient', 'Media node(s)' ].map((text, index) => (
-					<ListItem key={text} disablePadding onClick={async () => {
-						/* await client.reAuthenticate();
-
-						// Find all users
-						const users = await client.service('tenantOAuths').find();
-
-						// eslint-disable-next-line no-console
-						console.log(users); */
-
-						/* try {
-							const log = await client.service('rooms').create(
-								{ name: 'test2', description: 'testdesc3', maxActiveVideos: 4 }
-							);
-
-							// eslint-disable-next-line no-console
-							console.log(log);
-						} catch (error) {
-							// Show login page (potentially with `e.message`)
-							// eslint-disable-next-line no-console
-							console.log(error);
-							// if data already exists we cant add it TODO
-						} */
-
-					}}>
-						<ListItemButton>
-							<ListItemIcon>
-								{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-							</ListItemIcon>
-							<ListItemText primary={text} />
-						</ListItemButton>
-					</ListItem>
-				))}
 			</List>
 			<Divider />
 			<List>
@@ -291,8 +258,8 @@ export default function ResponsiveDrawer(props: Props) {
 
 						<Route path="/cli/" Component={LoginLayout} />
 						<Route path="/cli/room" Component={RoomTable} />
-						<Route path="/cli/tenant" Component={TenantTable} />
-						<Route path="/cli/tenantOAuth" Component={TenantOAuthTable} />
+						<Route path="/cli/tenant" Component={TenantPage} />
+						<Route path="/cli/tenantOAuth" Component={TenantOauthTable} />
 						<Route path="/cli/tenantFQDNs" Component={TenantFQDNsTable} />
 						<Route path="/cli/users" Component={UserTable} />
 						<Route path="/cli/products/:id" Component={Product} />
