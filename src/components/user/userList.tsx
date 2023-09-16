@@ -10,7 +10,6 @@ import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../../utils/edumeetConfig';
 import User from './userTypes';
-import { Label } from '@mui/icons-material';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 
@@ -62,11 +61,18 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'tenantAdmin',
-				header: 'tenantAdmin'
+				header: 'tenantAdmin',
+				filterVariant: 'checkbox',
+				Cell: ({ cell }) =>
+					(cell.getValue() === true ? 'yes' : 'no'),
+                
 			},
 			{
 				accessorKey: 'tenantOwner',
-				header: 'tenantOwner'
+				Cell: ({ cell }) =>
+					(cell.getValue() === true ? 'yes' : 'no'),
+				header: 'tenantOwner',
+				filterVariant: 'checkbox'
 			},
 		],
 		[],
@@ -323,7 +329,7 @@ const UserTable = () => {
 					// const troles=r[6].getValue();
 					const ttenantAdmin=r[7].getValue();
 					const ttenantOwner=r[8].getValue();
-
+	
 					if (typeof tid === 'number') {
 						setId(tid);
 					}
@@ -353,16 +359,16 @@ const UserTable = () => {
 						setAvatar('');
 					}
 					// todo roles
-					if (ttenantAdmin === '1') {
+					/* if (ttenantAdmin === true) {
 						setTenantAdmin(true);
 					} else {
 						setTenantAdmin(false);
 					}
-					if (ttenantOwner === '1') {
+					if (ttenantOwner === true) {
 						setTenantOwner(true);
 					} else {
 						setTenantOwner(false);
-					}
+					} */
 
 					handleClickOpenNoreset();
 
