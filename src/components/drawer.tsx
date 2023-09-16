@@ -31,6 +31,7 @@ import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../utils/edumeetConfig';
 import UserTable from './user/userList';
+import PermissionTable from './permission_stuff/permissions';
 
 const drawerWidth = 240;
 
@@ -131,6 +132,14 @@ export default function ResponsiveDrawer(props: Props) {
 							<InboxIcon />
 						</ListItemIcon>
 						<ListItemText primary={'Users'} />
+					</ListItemButton>
+				</ListItem>
+				<ListItem button component={Link} to={`${edumeetConfig.clipath}permissions`} key={'Permissions(s)'} disablePadding>
+					<ListItemButton >
+						<ListItemIcon>
+							<InboxIcon />
+						</ListItemIcon>
+						<ListItemText primary={'Permissions'} />
 					</ListItemButton>
 				</ListItem>
 			</List>
@@ -262,8 +271,8 @@ export default function ResponsiveDrawer(props: Props) {
 						<Route path="/cli/tenantOAuth" Component={TenantOauthTable} />
 						<Route path="/cli/tenantFQDNs" Component={TenantFQDNsTable} />
 						<Route path="/cli/users" Component={UserTable} />
+						<Route path="/cli/permissions" Component={PermissionTable} />
 						<Route path="/cli/products/:id" Component={Product} />
-
 					</Routes>
 
 				</Box>
