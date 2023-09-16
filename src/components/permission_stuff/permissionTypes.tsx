@@ -23,4 +23,10 @@ export type TenantOwners = {
     userId: number,   
 };
 
+export type TenantAdmins = {
+	id: number,
+    tenantId: number,
+    userId: number,   
+};
+
 export default User;
