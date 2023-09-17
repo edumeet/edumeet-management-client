@@ -327,14 +327,15 @@ const UserTable = () => {
 					const tname=r[4].getValue();
 					const tavatar=r[5].getValue();
 					// const troles=r[6].getValue();
-					const ttenantAdmin=r[7].getValue();
-					const ttenantOwner=r[8].getValue();
+					// const ttenantAdmin=r[7].getValue();
+					// const ttenantOwner=r[8].getValue();
 	
 					if (typeof tid === 'number') {
 						setId(tid);
 					}
+
 					if (typeof tssoId === 'string') {
-						setSsoId(ssoId);
+						setSsoId(tssoId);
 					} else {
 						setSsoId('');
 					}
