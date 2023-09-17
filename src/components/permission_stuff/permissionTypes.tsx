@@ -29,4 +29,18 @@ export type TenantAdmins = {
     userId: number,   
 };
 
+export type Permissions = {
+	id: number,
+    name: string,   
+    description: string,
+};
+
+export type Roles = {
+	id: number,
+    name: string,   
+    description: string,
+    permissions: Array<Permissions>
+    tenantId: number
+};
+
 export default User;
