@@ -3,8 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import Drawer from './components/drawer';
 
-import LoginPage from './components/loginPage';
-import RegisterPage from './components/RegisterPage';
+import LoginPage from './components/login/loginPage';
 
 import io from 'socket.io-client';
 import { feathers } from '@feathersjs/feathers';
@@ -58,7 +57,7 @@ async function main(): Promise<void> {
 		// console.log('showLoginPage()');
 		root.render(
 			<React.StrictMode>
-				<RegisterPage />
+				{/* <RegisterPage /> */}
 				<LoginPage />
 			</React.StrictMode>
 		);
