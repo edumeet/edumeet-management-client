@@ -8,7 +8,7 @@ import authentication from '@feathersjs/authentication-client';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { FormControl, FormLabel } from '@mui/material';
-import edumeetConfig from '../utils/edumeetConfig';
+import edumeetConfig from '../../utils/edumeetConfig';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 // Initialize our Feathers client application through Socket.io
