@@ -5,4 +5,10 @@ export type Groups = {
     tenantId: number
 };
 
+export type GroupUsers = {
+	id: number,
+    groupId: number,   
+    userId: number
+};
+
 export default Groups;

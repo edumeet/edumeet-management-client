@@ -1,4 +1,5 @@
 import TenantTable from './groupsList';
+import TenantTable2 from './groupsListUsers';
 
 const TenantPage = () => {
 	
@@ -6,6 +7,8 @@ const TenantPage = () => {
 		<h1>Groups</h1>
 		<TenantTable />
 		<hr/>
+		<h1>GroupsUsers</h1>
+		<TenantTable2 />
 	</>;
 };
 
