@@ -32,6 +32,7 @@ import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../utils/edumeetConfig';
 import UserTable from './user/userList';
 import GroupTable from './groups/groups';
+import RoleTable from './roles/roles';
 import PermissionTable from './permission_stuff/permissions';
 
 const drawerWidth = 240;
@@ -149,6 +150,14 @@ export default function ResponsiveDrawer(props: Props) {
 							<InboxIcon />
 						</ListItemIcon>
 						<ListItemText primary={'Permissions'} />
+					</ListItemButton>
+				</ListItem>
+				<ListItem button component={Link} to={`${edumeetConfig.clipath}roles`} key={'Role(s)'} disablePadding>
+					<ListItemButton >
+						<ListItemIcon>
+							<InboxIcon />
+						</ListItemIcon>
+						<ListItemText primary={'Role(s)'} />
 					</ListItemButton>
 				</ListItem>
 			</List>
@@ -281,7 +290,7 @@ export default function ResponsiveDrawer(props: Props) {
 						<Route path="/cli/tenantFQDNs" Component={TenantFQDNsTable} />
 						<Route path="/cli/users" Component={UserTable} />
 						<Route path="/cli/groups" Component={GroupTable} />
-
+						<Route path="/cli/roles" Component={RoleTable} />
 						<Route path="/cli/permissions" Component={PermissionTable} />
 						<Route path="/cli/products/:id" Component={Product} />
 					</Routes>
