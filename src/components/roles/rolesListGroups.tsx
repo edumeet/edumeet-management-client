@@ -78,7 +78,7 @@ const UserTable = () => {
 	const [ roleId, setRoleId ] = useState(0);
 	const [ roomId, setRoomId ] = useState(0);
 
-	const [ cantPatch, setCantPatch] = useState(true);
+	const [ cantPatch, setCantPatch ] = useState(true);
 	const [ cantDelete ] = useState(false);
 
 	async function fetchProduct() {
