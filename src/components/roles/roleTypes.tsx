@@ -8,4 +8,20 @@ export type Roles = {
     permissions: Array<Permissions>
 };
 
+export type GroupRoles = {
+	id: number,
+    groupId: number,
+    role:Array<Roles>,
+    roleId:number,
+    roomId:number
+};
+
+export type UsersRoles = {
+	id: number,
+    userId: number,
+    role:Array<Roles>,
+    roleId:number,
+    roomId:number
+};
+
 export default Roles;
