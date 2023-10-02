@@ -18,13 +18,9 @@ import Typography from '@mui/material/Typography';
 // import Table, { Room } from './table';
 import RoomTable from './room/roomList';
 import TenantPage from './tenant/tenant/tenant';
-
-import TenantFQDNsTable from './tenant/tenantFQDN/tenantFQDN';
-import TenantOauthTable from './tenant/tenantOauth/tenantOauth';
-
 import { BrowserRouter as Router, Route, Link, useParams, Routes } from 'react-router-dom';
 import LoginLayout from './test/test';
-
+import PersonIcon from '@mui/icons-material/Person';
 import io from 'socket.io-client';
 import { feathers } from '@feathersjs/feathers';
 import socketio from '@feathersjs/socketio-client';
@@ -34,8 +30,17 @@ import UserTable from './user/userList';
 import GroupTable from './groups/groups';
 import RoleTable from './roles/roles';
 import PermissionTable from './permission_stuff/permissions';
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
+import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
+import InfoIcon from '@mui/icons-material/Info';
+import LogoutIcon from '@mui/icons-material/Logout';
 
-const drawerWidth = 240;
+const drawerWidth = 300;
 
 interface Props {
 	username: string;
@@ -54,11 +59,17 @@ export default function ResponsiveDrawer(props: Props) {
 			{/* <Toolbar /> */}
 
 			<List>
+				<ListItem style={{ justifyContent: 'center' }} >
+					<img src='https://raw.githubusercontent.com/edumeet/edumeet/master/app/public/images/logo.edumeet.svg' />
+				</ListItem>
+			
+				<ListItem key={'{username}'} disablePadding >
 
-				<ListItem key={'{username}'} disablePadding>
 					<ListItemButton>
-
-						<ListItemText primary={`Logged in as [${username}]`} />
+						<ListItemIcon>
+							<PersonOutlineIcon/>
+						</ListItemIcon>
+						<ListItemText primary={`${username}`} />
 					</ListItemButton>
 				</ListItem>
 				<ListItem key={'Logout'} disablePadding onClick={
@@ -78,7 +89,7 @@ export default function ResponsiveDrawer(props: Props) {
 				}>
 					<ListItemButton>
 						<ListItemIcon>
-							<MailIcon />
+							<LogoutIcon />
 						</ListItemIcon>
 						<ListItemText primary={'Logout'} />
 					</ListItemButton>
@@ -99,31 +110,15 @@ export default function ResponsiveDrawer(props: Props) {
 				<ListItem button component={Link} to={`${edumeetConfig.clipath}tenant`} key={'Tenants'} disablePadding>
 					<ListItemButton >
 						<ListItemIcon>
-							<InboxIcon />
+							<PeopleOutlineIcon />
 						</ListItemIcon>
 						<ListItemText primary={'Tenants'} />
-					</ListItemButton>
-				</ListItem>
-				<ListItem button component={Link} to={`${edumeetConfig.clipath}tenantFQDNs`} key={'tenantFQDNs'} disablePadding>
-					<ListItemButton >
-						<ListItemIcon>
-							<InboxIcon />
-						</ListItemIcon>
-						<ListItemText primary={'tenantFQDNs'} />
-					</ListItemButton>
-				</ListItem>
-				<ListItem button component={Link} to={`${edumeetConfig.clipath}tenantOAuth`} key={'tenantOAuth'} disablePadding>
-					<ListItemButton >
-						<ListItemIcon>
-							<InboxIcon />
-						</ListItemIcon>
-						<ListItemText primary={'tenantOAuth'} />
 					</ListItemButton>
 				</ListItem>
 				<ListItem button component={Link} to={`${edumeetConfig.clipath}room`} key={'Room(s)'} disablePadding>
 					<ListItemButton >
 						<ListItemIcon>
-							<InboxIcon />
+							<MeetingRoomIcon />
 						</ListItemIcon>
 						<ListItemText primary={'Room(s)'} />
 					</ListItemButton>
@@ -131,7 +126,7 @@ export default function ResponsiveDrawer(props: Props) {
 				<ListItem button component={Link} to={`${edumeetConfig.clipath}users`} key={'User(s)'} disablePadding>
 					<ListItemButton >
 						<ListItemIcon>
-							<InboxIcon />
+							<PersonSearchIcon />
 						</ListItemIcon>
 						<ListItemText primary={'Users'} />
 					</ListItemButton>
@@ -139,7 +134,7 @@ export default function ResponsiveDrawer(props: Props) {
 				<ListItem button component={Link} to={`${edumeetConfig.clipath}groups`} key={'Group(s)'} disablePadding>
 					<ListItemButton >
 						<ListItemIcon>
-							<InboxIcon />
+							<SupervisorAccountIcon />
 						</ListItemIcon>
 						<ListItemText primary={'Groups'} />
 					</ListItemButton>
@@ -147,7 +142,7 @@ export default function ResponsiveDrawer(props: Props) {
 				<ListItem button component={Link} to={`${edumeetConfig.clipath}permissions`} key={'Permissions(s)'} disablePadding>
 					<ListItemButton >
 						<ListItemIcon>
-							<InboxIcon />
+							<ManageAccountsIcon />
 						</ListItemIcon>
 						<ListItemText primary={'Permissions'} />
 					</ListItemButton>
@@ -155,7 +150,7 @@ export default function ResponsiveDrawer(props: Props) {
 				<ListItem button component={Link} to={`${edumeetConfig.clipath}roles`} key={'Role(s)'} disablePadding>
 					<ListItemButton >
 						<ListItemIcon>
-							<InboxIcon />
+							<AdminPanelSettingsIcon />
 						</ListItemIcon>
 						<ListItemText primary={'Role(s)'} />
 					</ListItemButton>
@@ -167,7 +162,7 @@ export default function ResponsiveDrawer(props: Props) {
 					<ListItem key={text} disablePadding>
 						<ListItemButton>
 							<ListItemIcon>
-								{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+								{index % 2 === 0 ? <InfoIcon /> : <MailIcon />}
 							</ListItemIcon>
 							<ListItemText primary={text} />
 						</ListItemButton>
@@ -250,44 +245,14 @@ export default function ResponsiveDrawer(props: Props) {
 				>
 					<Toolbar />
 					<Typography paragraph>
-						Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-						tempor incididunt ut labore et dolore magna aliqua. Rhoncus dolor purus non
-						enim praesent elementum facilisis leo vel. Risus at ultrices mi tempus
-						imperdiet. Semper risus in hendrerit gravida rutrum quisque non tellus.
-						Convallis convallis tellus id interdum velit laoreet id donec ultrices.
-						Odio morbi quis commodo odio aenean sed adipiscing. Amet nisl suscipit
-						adipiscing bibendum est ultricies integer quis. Cursus euismod quis viverra
-						nibh cras. Metus vulputate eu scelerisque felis imperdiet proin fermentum
-						leo. Mauris commodo quis imperdiet massa tincidunt. Cras tincidunt lobortis
-						feugiat vivamus at augue. At augue eget arcu dictum varius duis at
-						consectetur lorem. Velit sed ullamcorper morbi tincidunt. Lorem donec massa
-						sapien faucibus et molestie ac.
+						
 					</Typography>
-					{/* Rooms
-				<div>
-					<RoomTable data={[]} />
-				</div>
-				Tenants
-				<div>
-					<TenantTable data={[]} />
-				</div>
-				TenantOAuth
-				<div>
-					<TenantOAuthTable data={[]} />
-				</div>
-				tenantFQDNs */}
-					{/* <div>
-					<TenantFQDNsTable />
-				</div> */}
-					LoginLayout
-
+				
 					<Routes>
 
 						<Route path="/cli/" Component={LoginLayout} />
 						<Route path="/cli/room" Component={RoomTable} />
 						<Route path="/cli/tenant" Component={TenantPage} />
-						<Route path="/cli/tenantOAuth" Component={TenantOauthTable} />
-						<Route path="/cli/tenantFQDNs" Component={TenantFQDNsTable} />
 						<Route path="/cli/users" Component={UserTable} />
 						<Route path="/cli/groups" Component={GroupTable} />
 						<Route path="/cli/roles" Component={RoleTable} />
