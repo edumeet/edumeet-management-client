@@ -11,7 +11,7 @@ export type Roles = {
 export type GroupRoles = {
 	id: number,
     groupId: number,
-    role:Array<Roles>,
+    role:Roles,
     roleId:number,
     roomId:number
 };
@@ -19,7 +19,7 @@ export type GroupRoles = {
 export type UsersRoles = {
 	id: number,
     userId: number,
-    role:Array<Roles>,
+    role:Roles,
     roleId:number,
     roomId:number
 };

@@ -23,6 +23,7 @@ import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../../utils/edumeetConfig';
 import { RoomOwners } from '../permission_stuff/permissionTypes';
+import { GroupRoles } from '../roles/roleTypes';
 import { Room } from './roomTypes';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
@@ -128,6 +129,15 @@ const UserTable = () => {
 				Cell: ({ cell }) =>
 					(	
 						cell.getValue<Array<RoomOwners>>().map((single:RoomOwners) => single.userId)
+							.join(', ')
+					),
+			},
+			{
+				accessorKey: 'groupRoles',
+				header: 'groupRoles',
+				Cell: ({ cell }) =>
+					(	
+						cell.getValue<Array<GroupRoles>>().map((single:GroupRoles) => single.role.description)
 							.join(', ')
 					),
 			},
@@ -314,7 +324,8 @@ const UserTable = () => {
 						chatEnabled: chatEnabled,
 						raiseHandEnabled: raiseHandEnabled,
 						filesharingEnabled: filesharingEnabled,
-						localRecordingEnabled: localRecordingEnabled
+						localRecordingEnabled: localRecordingEnabled,
+						defaultRoleId: 1 
 					}
 				);
 

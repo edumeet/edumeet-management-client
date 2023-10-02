@@ -1,4 +1,5 @@
 import { RoomOwners } from '../permission_stuff/permissionTypes';
+import Roles from '../roles/roleTypes';
 
 export type Room = {
 
@@ -16,6 +17,7 @@ export type Room = {
 	chatEnabled: boolean,
 	raiseHandEnabled: boolean,
 	filesharingEnabled: boolean,
+	groupRoles: Array<Roles>,
 	localRecordingEnabled: boolean,
 	owners: Array<RoomOwners>
 };
