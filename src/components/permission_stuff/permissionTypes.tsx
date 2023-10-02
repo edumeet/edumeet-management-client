@@ -43,4 +43,11 @@ export type Roles = {
     tenantId: number
 };
 
+export type RolePermissions = {
+	id: number,
+    permission: Permissions
+    permissionId: number,   
+    roleId: number,
+};
+
 export default User;

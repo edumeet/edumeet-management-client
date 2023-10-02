@@ -3,6 +3,8 @@ import TenantTable2 from './permissionsListTenantOwners';
 import TenantTable3 from './permissionsListTenantAdmins';
 import TenantTable4 from './permissionsList';
 import TenantTable5 from './rolesList';
+import TenantTable6 from './permissionsListRolePermission';
+
 const TenantPage = () => {
 	
 	return 	<>
@@ -19,6 +21,8 @@ const TenantPage = () => {
 		<TenantTable4 />
 		<h1>Roles</h1>
 		<TenantTable5 />
+		<h1>Role permissions</h1>
+		<TenantTable6 />
 	</>;
 };
 
