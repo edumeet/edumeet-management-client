@@ -325,7 +325,8 @@ const UserTable = () => {
 						raiseHandEnabled: raiseHandEnabled,
 						filesharingEnabled: filesharingEnabled,
 						localRecordingEnabled: localRecordingEnabled,
-						defaultRoleId: 1 
+
+						/* defaultRoleId: 1  */
 					}
 				);
 
@@ -455,7 +456,6 @@ const UserTable = () => {
 					const traiseHandEnabled=r[12].getValue();
 					const tfilesharingEnabled=r[13].getValue();
 					const tlocalRecordingEnabled=r[14].getValue();
-
 
 					if (typeof tid === 'number') {
 						setId(tid);
