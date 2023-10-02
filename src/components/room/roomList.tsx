@@ -326,7 +326,6 @@ const UserTable = () => {
 						filesharingEnabled: filesharingEnabled,
 						localRecordingEnabled: localRecordingEnabled,
 
-						/* defaultRoleId: 1  */
 					}
 				);
 

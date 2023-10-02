@@ -1,5 +1,5 @@
 import TenantDesc from './description';
-import TenantTable from './roomList';
+import TenantTable from './userList';
 
 const TenantPage = () => {
 	

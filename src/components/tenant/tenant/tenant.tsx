@@ -1,4 +1,4 @@
-import TenantDesc from './tenantDesc';
+import TenantDesc from './description';
 import TenantTable from './tenantList';
 import TenantTable2 from './tenantFQDNList';
 import TenantTable3 from './tenantOauthList';
