@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { SyntheticEvent, useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
 
@@ -7,9 +7,11 @@ import { feathers } from '@feathersjs/feathers';
 import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../../../utils/edumeetConfig';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Autocomplete } from '@mui/material';
 import React from 'react';
 import TenantOAuth from './tenantOauthTypes';
+import { Tenant } from './tenantTypes';
+import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 
@@ -27,6 +29,32 @@ const TenantTable = () => {
 
 	const serviceName='tenantOAuths';
 
+	const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+		props,
+		ref,
+	) {
+		return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+	});
+
+	type TenantOptionTypes = Array<Tenant>
+
+	const [ tenants, setTenants ] = useState<TenantOptionTypes>([ { 'id': 0, 'name': '', 'description': '' } ]);
+
+
+	const [ alertOpen, setAlertOpen ] = React.useState(false);
+	const [ alertMessage, setAlertMessage ] = React.useState('');
+	const [ alertSeverity, setAlertSeverity ] = React.useState<AlertColor>('success');
+
+	const getTenantName = (id: string): string => {
+		const t = tenants.find((type) => type.id === parseInt(id));
+
+		if (t && t.name) {
+			return t.name;
+		} else {
+			return 'undefined tenant';
+		}
+	};
+
 	// eslint-disable-next-line camelcase
 	const columns = useMemo<MRT_ColumnDef<TenantOAuth>[]>(
 		() => [
@@ -37,7 +65,9 @@ const TenantTable = () => {
 			},
 			{
 				accessorKey: 'tenantId',
-				header: 'tenantId'
+				header: 'tenantId',
+				Cell: ({ cell }) => getTenantName(cell.getValue<string>())
+
 			},
 			{
 				accessorKey: 'access_url',
@@ -65,7 +95,7 @@ const TenantTable = () => {
 			},
 			
 		],
-		[],
+		[ tenants ],
 	);
 
 	const [ data, setData ] = useState([]);
@@ -80,11 +110,28 @@ const TenantTable = () => {
 	const [ scope, setScope ] = useState('');
 	const [ scopeDelimeter, setScopeDelimeter ] = useState('');
 	const [ redirect, setRedirect ] = useState('');
+	const [ tenantIdOption, setTenantIdOption ] = useState<Tenant | undefined>();
 
 	async function fetchProduct() {
 		setIsLoading(true);
 
 		await client.reAuthenticate();
+
+		const t = await client.service('tenants').find(
+			{
+				query: {
+					$sort: {
+						id: 1
+					}
+				}
+			}
+		);
+
+		// eslint-disable-next-line no-console
+		console.log('t');
+		// eslint-disable-next-line no-console
+		console.log(t);
+		setTenants(t.data);
 
 		// Find all users
 		const tenant = await client.service(serviceName).find(
@@ -130,8 +177,11 @@ const TenantTable = () => {
 		setOpen(true);
 	};
 
-	const handleTenantIdChange = (event: { target: { value: string; }; }) => {
-		setTenantId(parseInt(event.target.value));
+	const handleTenantIdChange = (event: SyntheticEvent<Element, Event>, newValue: Tenant) => {
+		if (newValue) {
+			setTenantId(newValue.id);
+			setTenantIdOption(newValue);
+		}
 	};
 
 	const handleProfileUrlChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
@@ -263,12 +313,9 @@ const TenantTable = () => {
 						These are the parameters that you can change.
 					</DialogContentText>
 					<input type="hidden" name="id" value={id} />
-					<TextField
-
-						/* 						style={tenantIdHidden ? { display: 'none' } : {}} */
+					{/* <TextField
 						autoFocus
 						margin="dense"
-
 						id="tenantId"
 						label="tenantId"
 						type="number"
@@ -276,6 +323,17 @@ const TenantTable = () => {
 						fullWidth
 						onChange={handleTenantIdChange}
 						value={tenantId}
+					/> */}
+					<Autocomplete
+						options={tenants}
+						getOptionLabel={(option) => option.name}
+						fullWidth
+						disableClearable
+						id="combo-box-demo"
+						onChange={handleTenantIdChange}
+						value={tenantIdOption}
+						sx={{ marginTop: '8px' }}
+						renderInput={(params) => <TextField {...params} label="Tenant" />}
 					/>
 					
 					<TextField
@@ -387,9 +445,17 @@ const TenantTable = () => {
 					if (typeof tid === 'number') {
 						setId(tid);
 					}
-					if (typeof ttenantId === 'string') { setTenantId(parseInt(ttenantId)); } else {
+					if (typeof ttenantId === 'string') {
+						const ttenant = tenants.find((x) => x.id === parseInt(ttenantId));
+
+						if (ttenant) {
+							setTenantIdOption(ttenant);
+						}
+						setTenantId(parseInt(ttenantId));
+					} else {
 						setTenantId(0);
 					}
+
 					if (typeof tprofile === 'string') { setProfileUrl(tprofile); } else {
 						setProfileUrl('');
 					}

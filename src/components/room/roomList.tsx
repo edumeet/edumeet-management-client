@@ -11,10 +11,10 @@ gourps/users/rooms
 
 */
 
-import { useEffect, useMemo, useState } from 'react';
+import { SyntheticEvent, useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, FormControlLabel, Checkbox } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, FormControlLabel, Checkbox, Autocomplete } from '@mui/material';
 import React from 'react';
 
 import io from 'socket.io-client';
@@ -25,6 +25,8 @@ import edumeetConfig from '../../utils/edumeetConfig';
 import { RoomOwners } from '../permission_stuff/permissionTypes';
 import { GroupRoles } from '../roles/roleTypes';
 import { Room } from './roomTypes';
+import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
+import { Tenant } from '../tenant/tenant/tenantTypes';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 
@@ -40,6 +42,31 @@ client.configure(authentication());
 
 const UserTable = () => {
 	const serviceName='rooms';
+
+	const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+		props,
+		ref,
+	) {
+		return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+	});
+
+	type TenantOptionTypes = Array<Tenant>
+
+	const [ tenants, setTenants ] = useState<TenantOptionTypes>([ { 'id': 0, 'name': '', 'description': '' } ]);
+
+	const [ alertOpen, setAlertOpen ] = React.useState(false);
+	const [ alertMessage, setAlertMessage ] = React.useState('');
+	const [ alertSeverity, setAlertSeverity ] = React.useState<AlertColor>('success');
+
+	const getTenantName = (id: string): string => {
+		const t = tenants.find((type) => type.id === parseInt(id));
+
+		if (t && t.name) {
+			return t.name;
+		} else {
+			return 'undefined tenant';
+		}
+	};
 
 	// should be memoized or stable
 	// eslint-disable-next-line camelcase
@@ -60,7 +87,8 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'createdAt',
-				header: 'Created at'
+				header: 'Created at',
+				Cell: ({ cell }) => new Date(parseInt(cell.getValue<string>())).toLocaleString()
 			},
 			{
 				accessorKey: 'updatedAt',
@@ -72,7 +100,8 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'tenantId',
-				header: 'Tenant id'
+				header: 'Tenant id',
+				Cell: ({ cell }) => getTenantName(cell.getValue<string>())
 			},
 			{
 				accessorKey: 'logo',
@@ -143,7 +172,7 @@ const UserTable = () => {
 			},
 			
 		],
-		[],
+		[ tenants ],
 	);
 
 	const [ data, setData ] = useState([]);
@@ -161,12 +190,29 @@ const UserTable = () => {
 	const [ raiseHandEnabled, setRaiseHandEnabled ] = useState(false);
 	const [ filesharingEnabled, setFilesharingEnabled ] = useState(false);
 	const [ localRecordingEnabled, setLocalRecordingEnabled ] = useState(false);
-	
+	const [ tenantIdOption, setTenantIdOption ] = useState<Tenant | undefined>();
+
 	const [ cantPatch ] = useState(false);
 	const [ cantDelete ] = useState(false);
 
 	async function fetchProduct() {
 		await client.reAuthenticate();
+		const t = await client.service('tenants').find(
+			{
+				query: {
+					$sort: {
+						id: 1
+					}
+				}
+			}
+		);
+
+		// eslint-disable-next-line no-console
+		console.log('t');
+		// eslint-disable-next-line no-console
+		console.log(t);
+		setTenants(t.data);
+
 		// Find all users
 		const user = await client.service(serviceName).find(
 			{
@@ -225,8 +271,11 @@ const UserTable = () => {
 	const handleDescriptionChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
 		setDescription(event.target.value);
 	};
-	const handleTenantIdChange = (event: { target: { value: string; }; }) => {
-		setTenantId(parseInt(event.target.value));
+	const handleTenantIdChange = (event: SyntheticEvent<Element, Event>, newValue: Tenant) => {
+		if (newValue) {
+			setTenantId(newValue.id);
+			setTenantIdOption(newValue);
+		}
 	};
 
 	const handleLogoChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
@@ -379,7 +428,7 @@ const UserTable = () => {
 						onChange={handleDescriptionChange}
 						value={description}
 					/>
-					<TextField
+					{/* <TextField
 						autoFocus
 						margin="dense"
 						id="tenantId"
@@ -390,6 +439,17 @@ const UserTable = () => {
 						fullWidth
 						onChange={handleTenantIdChange}
 						value={tenantId}
+					/> */}
+					<Autocomplete
+						options={tenants}
+						getOptionLabel={(option) => option.name}
+						fullWidth
+						disableClearable
+						id="combo-box-demo"
+						onChange={handleTenantIdChange}
+						value={tenantIdOption}
+						sx={{ marginTop: '8px' }}
+						renderInput={(params) => <TextField {...params} label="Tenant" />}
 					/>
 					<TextField
 						autoFocus
@@ -470,6 +530,11 @@ const UserTable = () => {
 						setDescription('');
 					}
 					if (typeof ttenantId === 'string') {
+						const ttenant = tenants.find((x) => x.id === parseInt(ttenantId));
+
+						if (ttenant) {
+							setTenantIdOption(ttenant);
+						}
 						setTenantId(parseInt(ttenantId));
 					} else {
 						setTenantId(0);
