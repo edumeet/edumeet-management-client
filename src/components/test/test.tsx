@@ -1,14 +1,5 @@
-import { Container, Button } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { Container } from '@mui/material';
 function LoginLayout() {
-
-	const navigate = useNavigate();
-	
-	const routeChange = () => {
-		const path = 'products/1';
-
-		navigate(path);
-	}; 
 
 	return (
 		<div className="app flex-row align-items-center">

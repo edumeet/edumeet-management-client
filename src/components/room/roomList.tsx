@@ -14,7 +14,7 @@ gourps/users/rooms
 import { SyntheticEvent, useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, FormControlLabel, Checkbox, Autocomplete } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, FormControlLabel, Checkbox, Autocomplete, Snackbar } from '@mui/material';
 import React from 'react';
 
 import io from 'socket.io-client';
@@ -92,7 +92,8 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'updatedAt',
-				header: 'Updated at'
+				header: 'Updated at',
+				Cell: ({ cell }) => new Date(parseInt(cell.getValue<string>())).toLocaleString()
 			},
 			{
 				accessorKey: 'creatorId',
@@ -181,6 +182,7 @@ const UserTable = () => {
 	const [ name, setName ] = useState('');
 	const [ nameDisabled, setNameDisabled ] = useState(false);
 	const [ description, setDescription ] = useState('');
+	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 	const [ tenantId, setTenantId ] = useState(0);
 	const [ logo, setLogo ] = useState('');
 	const [ background, setBackground ] = useState('');
@@ -319,12 +321,18 @@ const UserTable = () => {
 
 				// eslint-disable-next-line no-console
 				console.log(log);
+				
 				fetchProduct();
 				setOpen(false);
+				setAlertMessage('Successfull delete!');
+				setAlertSeverity('success');
+				setAlertOpen(true);
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		}
 	};
@@ -334,6 +342,7 @@ const UserTable = () => {
 		// add new data / mod data / error
 		if (name != '' && id === 0) {
 			try {
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
 				const user = await client.reAuthenticate();
 				const log = await client.service(serviceName).create(
 					{ 
@@ -351,12 +360,20 @@ const UserTable = () => {
 					}
 				);
 
+				// eslint-disable-next-line no-console
+				console.log(log);
+
 				fetchProduct();
 				setOpen(false);
+				setAlertMessage('Successfull add!');
+				setAlertSeverity('success');
+				setAlertOpen(true);
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		} else if (name != '' && id != 0) {
 			try {
@@ -382,22 +399,39 @@ const UserTable = () => {
 				console.log(log);
 				fetchProduct();
 				setOpen(false);
-
+				setAlertMessage('Successfull modify!');
+				setAlertSeverity('success');
+				setAlertOpen(true);
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		}
 
 	};
 
+	const handleAlertClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+		if (reason === 'clickaway') {
+			return;
+		}
+  
+		setAlertOpen(false);
+	};
+	
 	return <>
 		<div>
 			<Button variant="outlined" onClick={() => handleClickOpen()}>
 				Add new
 			</Button>
 			<hr/>
+			<Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleAlertClose}>
+				<Alert onClose={handleAlertClose} severity={alertSeverity} sx={{ width: '100%' }}>
+					{alertMessage}
+				</Alert>
+			</Snackbar>
 			<Dialog open={open} onClose={handleClose}>
 				<DialogTitle>Add/Edit</DialogTitle>
 				<DialogContent>

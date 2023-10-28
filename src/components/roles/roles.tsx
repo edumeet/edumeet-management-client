@@ -2,7 +2,6 @@ import TenantTable from './rolesList';
 import TenantTable2 from './rolesListGroups';
 import TenantTable3 from './rolesListUsers';
 
-
 const TenantPage = () => {
 	
 	return 	<>

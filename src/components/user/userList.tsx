@@ -1,7 +1,7 @@
 import { SyntheticEvent, useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Checkbox, FormControlLabel, Autocomplete } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Checkbox, FormControlLabel, Autocomplete, Snackbar } from '@mui/material';
 import React from 'react';
 
 import io from 'socket.io-client';
@@ -12,7 +12,6 @@ import edumeetConfig from '../../utils/edumeetConfig';
 import User from './userTypes';
 import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
 import Tenant from '../tenant/tenant/tenantTypes';
-
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 
@@ -39,7 +38,6 @@ const UserTable = () => {
 	type TenantOptionTypes = Array<Tenant>
 
 	const [ tenants, setTenants ] = useState<TenantOptionTypes>([ { 'id': 0, 'name': '', 'description': '' } ]);
-
 
 	const [ alertOpen, setAlertOpen ] = React.useState(false);
 	const [ alertMessage, setAlertMessage ] = React.useState('');
@@ -229,6 +227,9 @@ const UserTable = () => {
 				console.log(log);
 				fetchProduct();
 				setOpen(false);
+				setAlertMessage('Successfull delete!');
+				setAlertSeverity('success');
+				setAlertOpen(true);
 			} catch (error) {
 				// eslint-disable-next-line no-console
 				console.log(error);
@@ -252,6 +253,9 @@ const UserTable = () => {
 						avatar: avatar
 					}
 				);
+
+				// eslint-disable-next-line no-console
+				console.log(log);
 
 				fetchProduct();
 				setOpen(false);
@@ -288,12 +292,25 @@ const UserTable = () => {
 
 	};
 
+	const handleAlertClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+		if (reason === 'clickaway') {
+			return;
+		}
+  
+		setAlertOpen(false);
+	};	
+
 	return <>
 		<div>
 			<Button variant="outlined" onClick={() => handleClickOpen()}>
 				Add new
 			</Button>
 			<hr/>
+			<Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleAlertClose}>
+				<Alert onClose={handleAlertClose} severity={alertSeverity} sx={{ width: '100%' }}>
+					{alertMessage}
+				</Alert>
+			</Snackbar>
 			<Dialog open={open} onClose={handleClose}>
 				<DialogTitle>Add/Edit</DialogTitle>
 				<DialogContent>

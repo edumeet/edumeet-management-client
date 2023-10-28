@@ -14,7 +14,7 @@ gourps/users/rooms
 import { SyntheticEvent, useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Autocomplete } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Autocomplete, Snackbar } from '@mui/material';
 import React from 'react';
 
 import io from 'socket.io-client';
@@ -52,7 +52,6 @@ const UserTable = () => {
 	type TenantOptionTypes = Array<Tenant>
 
 	const [ tenants, setTenants ] = useState<TenantOptionTypes>([ { 'id': 0, 'name': '', 'description': '' } ]);
-
 
 	const [ alertOpen, setAlertOpen ] = React.useState(false);
 	const [ alertMessage, setAlertMessage ] = React.useState('');
@@ -188,7 +187,6 @@ const UserTable = () => {
 		}
 	};
 
-
 	const handleClose = () => {
 		setOpen(false);
 	};
@@ -208,10 +206,15 @@ const UserTable = () => {
 				console.log(log);
 				fetchProduct();
 				setOpen(false);
+				setAlertMessage('Successfull delete!');
+				setAlertSeverity('success');
+				setAlertOpen(true);
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		}
 	};
@@ -230,12 +233,17 @@ const UserTable = () => {
 					}
 				);
 
+				// eslint-disable-next-line no-console
+				console.log(log);
+
 				fetchProduct();
 				setOpen(false);
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		} else if (name != '' && id != 0) {
 			try {
@@ -255,12 +263,22 @@ const UserTable = () => {
 				setOpen(false);
 
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		}
 
+	};
+
+	const handleAlertClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+		if (reason === 'clickaway') {
+			return;
+		}
+  
+		setAlertOpen(false);
 	};
 
 	return <>
@@ -269,6 +287,11 @@ const UserTable = () => {
 				Add new
 			</Button>
 			<hr/>
+			<Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleAlertClose}>
+				<Alert onClose={handleAlertClose} severity={alertSeverity} sx={{ width: '100%' }}>
+					{alertMessage}
+				</Alert>
+			</Snackbar>
 			<Dialog open={open} onClose={handleClose}>
 				<DialogTitle>Add/Edit</DialogTitle>
 				<DialogContent>

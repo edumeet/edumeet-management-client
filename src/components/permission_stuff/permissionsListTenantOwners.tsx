@@ -14,7 +14,7 @@ gourps/users/rooms
 import { useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Checkbox, FormControlLabel } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions } from '@mui/material';
 import React from 'react';
 
 import io from 'socket.io-client';
@@ -159,6 +159,9 @@ const UserTable = () => {
 						userId: userId
 					}
 				);
+
+				// eslint-disable-next-line no-console
+				console.log(log);
 
 				fetchProduct();
 				setOpen(false);

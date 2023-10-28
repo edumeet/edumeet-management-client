@@ -177,6 +177,9 @@ const UserTable = () => {
 					}
 				);
 
+				// eslint-disable-next-line no-console
+				console.log(log);
+
 				fetchProduct();
 				setOpen(false);
 			} catch (error) {

@@ -223,11 +223,11 @@ const UserTable = () => {
 
 			} catch (error) {
 				// eslint-disable-next-line no-console
-				console.log(error);
-
-				setAlertMessage(error.toString());
-				setAlertSeverity('error');
-				setAlertOpen(true);
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 				// if data already exists we cant add it TODO
 			}
 		}
@@ -245,6 +245,9 @@ const UserTable = () => {
 					}
 				);
 
+				// eslint-disable-next-line no-console
+				console.log(log);
+
 				fetchProduct();
 				setOpen(false);
 
@@ -252,11 +255,11 @@ const UserTable = () => {
 				setAlertSeverity('success');
 				setAlertOpen(true);
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				setAlertMessage(error.toString());
-				setAlertOpen(true);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		} else if (name != '' && id != 0) {
 			try {
@@ -279,12 +282,11 @@ const UserTable = () => {
 				setAlertSeverity('success');
 				setAlertOpen(true);
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				setAlertMessage(error.toString());
-				setAlertSeverity('error');
-				setAlertOpen(true);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		} else {
 			setAlertMessage('Name cannot be empty!');
@@ -293,7 +295,7 @@ const UserTable = () => {
 		}
 
 	};
-
+	
 	return <>
 		<div>
 			

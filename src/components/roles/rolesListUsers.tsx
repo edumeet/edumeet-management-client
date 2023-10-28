@@ -179,6 +179,9 @@ const UserTable = () => {
 
 				fetchProduct();
 				setOpen(false);
+				// eslint-disable-next-line no-console
+				console.log(log);
+
 			} catch (error) {
 				// eslint-disable-next-line no-console
 				console.log(error);

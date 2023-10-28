@@ -20,7 +20,6 @@ import RoomTable from './room/room';
 import TenantPage from './tenant/tenant/tenant';
 import { BrowserRouter as Router, Route, Link, useParams, Routes } from 'react-router-dom';
 import LoginLayout from './test/test';
-import PersonIcon from '@mui/icons-material/Person';
 import io from 'socket.io-client';
 import { feathers } from '@feathersjs/feathers';
 import socketio from '@feathersjs/socketio-client';
