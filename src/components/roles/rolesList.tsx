@@ -14,7 +14,7 @@ gourps/users/rooms
 import { SyntheticEvent, useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Autocomplete, Snackbar } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Autocomplete, Snackbar, FormControlLabel, Checkbox, Box } from '@mui/material';
 import React from 'react';
 
 import io from 'socket.io-client';
@@ -22,7 +22,7 @@ import { feathers } from '@feathersjs/feathers';
 import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../../utils/edumeetConfig';
-import { Permissions } from '../permission_stuff/permissionTypes';
+import { Permissions, RolePermissions } from '../permission_stuff/permissionTypes';
 import { Roles } from './roleTypes';
 import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
 import Tenant from '../tenant/tenant/tenantTypes';
@@ -40,7 +40,7 @@ client.configure(authentication());
 // nested data is ok, see accessorKeys in ColumnDef below
 
 const UserTable = () => {
-	const serviceName='roles';
+	const serviceName = 'roles';
 
 	const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 		props,
@@ -93,12 +93,12 @@ const UserTable = () => {
 				accessorKey: 'permissions',
 				header: 'permissions',
 				Cell: ({ cell }) =>
-					(	
-						cell.getValue<Array<Permissions>>().map((single:Permissions) => single.name)
+					(
+						cell.getValue<Array<Permissions>>().map((single: Permissions) => single.name)
 							.join(', ')
 					),
 			},
-			
+
 		],
 		[ tenants ],
 	);
@@ -155,6 +155,26 @@ const UserTable = () => {
 	}
 
 	useEffect(() => {
+
+		async function getPermissions() {
+			await client.reAuthenticate();
+			const p = await client.service('permissions').find(
+				{
+					query: {
+						$sort: {
+							id: 1
+						}
+					}
+				}
+			);
+
+			setPermissions(p.data);
+
+			setChecked(new Array(p.data.length).fill(true));
+
+		}
+		getPermissions();
+
 		// By moving this function inside the effect, we can clearly see the values it uses.
 		setIsLoading(true);
 		fetchProduct();
@@ -167,6 +187,8 @@ const UserTable = () => {
 		setName('');
 		setDescription('');
 		setTenantId(0);
+		setChecked(new Array(permissions.length).fill(false));
+
 		setOpen(true);
 	};
 
@@ -226,7 +248,7 @@ const UserTable = () => {
 			try {
 				await client.reAuthenticate();
 				const log = await client.service(serviceName).create(
-					{ 
+					{
 						name: name,
 						description: description,
 						tenantId: tenantId
@@ -250,7 +272,7 @@ const UserTable = () => {
 				await client.reAuthenticate();
 				const log = await client.service(serviceName).patch(
 					id,
-					{ 
+					{
 						name: name,
 						description: description,
 						tenantId: tenantId
@@ -269,6 +291,77 @@ const UserTable = () => {
 					setAlertOpen(true);
 				}
 			}
+
+			const rp = await client.service('rolePermissions').find(
+				{
+					query: {
+						roleId: id,
+						$sort: {
+							id: 1
+						}
+					}
+				}
+			);
+
+			checked.forEach(async (element, index) => {
+				// eslint-disable-next-line no-console
+				console.log(element, index, id);
+
+				const c = rp.data.filter((x: RolePermissions) => x.permissionId == index+1);
+
+				if ((c.length === 0) === element) {
+					// eslint-disable-next-line no-console
+					console.log('should update this');
+
+					if (element) {
+						// add permissionrole
+						try {
+							await client.reAuthenticate();
+					
+							const log = await client.service('rolePermissions').create(
+								{ 
+									roleId: id,
+									permissionId: index+1
+								}
+							);
+
+							// eslint-disable-next-line no-console
+							console.log(log);
+						} catch (error) {
+							if (error instanceof Error) {
+								setAlertMessage(error.toString());
+								setAlertSeverity('error');
+								setAlertOpen(true);
+							}
+						}
+					} else {
+						// remove role
+						// eslint-disable-next-line no-console
+						console.log('should remove', c[0].id);
+						try {
+							await client.reAuthenticate();
+
+							const log = await client.service('rolePermissions').remove(
+								c[0].id
+							);
+							
+							// eslint-disable-next-line no-console
+							console.log(log);
+						} catch (error) {
+							if (error instanceof Error) {
+								setAlertMessage(error.toString());
+								setAlertSeverity('error');
+								setAlertOpen(true);
+							}
+						}
+						
+					}
+
+				}
+				// eslint-disable-next-line no-console
+				console.log(c);
+
+			});
 		}
 
 	};
@@ -277,16 +370,47 @@ const UserTable = () => {
 		if (reason === 'clickaway') {
 			return;
 		}
-  
+
 		setAlertOpen(false);
 	};
+	const [ permissions, setPermissions ] = React.useState(Array<Permissions>);
+
+	const [ checked, setChecked ] = React.useState(new Array(0).fill(true));
+
+	const handleChange1 = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setChecked(new Array(permissions.length).fill(event.target.checked));
+	};
+
+	const handleChangeMod = (event: React.ChangeEvent<HTMLInputElement>, i: number) => {
+		setChecked(checked.map(function(currentelement, index) {
+			if (index === i) { return event.target.checked; }
+
+			return currentelement;
+		}));
+	};
+
+	const children = (
+		<Box sx={{ display: 'flex', flexDirection: 'column', ml: 3 }}>
+			{Object.entries(permissions).map(([ key, value ]) =>
+				<FormControlLabel
+					key={`${key}uniqe`}
+					control={<Checkbox checked={checked[parseInt(key)]}
+						onChange={(event) => handleChangeMod(event, parseInt(key))
+						}
+						name={`${key}uniq`} />}
+
+					label={value.name}
+				/>
+			)}
+		</Box>
+	);
 
 	return <>
 		<div>
 			<Button variant="outlined" onClick={() => handleClickOpen()}>
 				Add new
 			</Button>
-			<hr/>
+			<hr />
 			<Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleAlertClose}>
 				<Alert onClose={handleAlertClose} severity={alertSeverity} sx={{ width: '100%' }}>
 					{alertMessage}
@@ -332,7 +456,19 @@ const UserTable = () => {
 						sx={{ marginTop: '8px' }}
 						renderInput={(params) => <TextField {...params} label="Tenant" />}
 					/>
-					
+					<div>
+						<FormControlLabel
+							label="All permissions"
+							control={
+								<Checkbox
+									checked={checked.every((num) => num === true)}
+									indeterminate={checked.some((num) => num === true) && checked.some((num) => num === false)}
+									onChange={handleChange1}
+								/>
+							}
+						/>
+						{children}
+					</div>
 				</DialogContent>
 				<DialogActions>
 					<Button onClick={delTenant} disabled={cantDelete} color='warning'>Delete</Button>
@@ -343,14 +479,14 @@ const UserTable = () => {
 		</div>
 		<MaterialReactTable
 			muiTableBodyRowProps={({ row }) => ({
-				onClick: () => {
+				onClick: async () => {
 
 					const r = row.getAllCells();
 
 					const tid = r[0].getValue();
-					const tname=r[1].getValue();
-					const tdescription=r[2].getValue();
-					const ttenantId=r[3].getValue();
+					const tname = r[1].getValue();
+					const tdescription = r[2].getValue();
+					const ttenantId = r[3].getValue();
 
 					if (typeof tid === 'number') {
 						setId(tid);
@@ -375,6 +511,24 @@ const UserTable = () => {
 					} else {
 						setTenantId(0);
 					}
+
+					await client.reAuthenticate();
+					const rp = await client.service('rolePermissions').find(
+						{
+							query: {
+								roleId: tid,
+								$sort: {
+									id: 1
+								}
+							}
+						}
+					);
+					const a = new Array(permissions.length).fill(false);
+
+					rp.data.forEach((element: RolePermissions) => {
+						a[element.permissionId-1] = true;
+					});
+					setChecked(a);
 
 					handleClickOpenNoreset();
 
