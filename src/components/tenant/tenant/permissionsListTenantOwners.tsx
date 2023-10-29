@@ -21,8 +21,8 @@ import io from 'socket.io-client';
 import { feathers } from '@feathersjs/feathers';
 import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
-import edumeetConfig from '../../utils/edumeetConfig';
-import { TenantOwners } from './permissionTypes';
+import edumeetConfig from '../../../utils/edumeetConfig';
+import { TenantOwners } from '../../permission_stuff/permissionTypes';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 

@@ -14,16 +14,15 @@ gourps/users/rooms
 import { useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Snackbar } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions } from '@mui/material';
 import React from 'react';
 
 import io from 'socket.io-client';
 import { feathers } from '@feathersjs/feathers';
 import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
-import edumeetConfig from '../../utils/edumeetConfig';
-import { RolePermissions, Permissions } from './permissionTypes';
-import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
+import edumeetConfig from '../../../utils/edumeetConfig';
+import { TenantOwners } from '../../permission_stuff/permissionTypes';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 
@@ -38,22 +37,11 @@ client.configure(authentication());
 // nested data is ok, see accessorKeys in ColumnDef below
 
 const UserTable = () => {
-	const serviceName='rolePermissions';
-
-	const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-		props,
-		ref,
-	) {
-		return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-	});
-
-	const [ alertOpen, setAlertOpen ] = React.useState(false);
-	const [ alertMessage, setAlertMessage ] = React.useState('');
-	const [ alertSeverity, setAlertSeverity ] = React.useState<AlertColor>('success');
+	const serviceName='tenantAdmins';
 
 	// should be memoized or stable
 	// eslint-disable-next-line camelcase
-	const columns = useMemo<MRT_ColumnDef<RolePermissions>[]>(
+	const columns = useMemo<MRT_ColumnDef<TenantOwners>[]>(
 		() => [
 
 			{
@@ -61,22 +49,13 @@ const UserTable = () => {
 				header: 'id'
 			},
 			{
-				accessorKey: 'permission',
-				header: 'permission',
-				Cell: ({ cell }) =>
-					(	
-						cell.getValue<Permissions>()['name']
-					)
+				accessorKey: 'tenantId',
+				header: 'tenantId'
 			},
 			{
-				accessorKey: 'permissionId',
-				header: 'permissionId'
+				accessorKey: 'userId',
+				header: 'userId'
 			},
-			{
-				accessorKey: 'roleId',
-				header: 'roleId'
-			},
-
 		],
 		[],
 	);
@@ -84,10 +63,10 @@ const UserTable = () => {
 	const [ data, setData ] = useState([]);
 	const [ isLoading, setIsLoading ] = useState(false);
 	const [ id, setId ] = useState(0);
-	const [ permissionId, setPermissionId ] = useState(0);
-	const [ roleId, setRoleId ] = useState(0);
-	const [ cantPatch, setCantPatch ] = useState(true);
-	const [ cantDelete ] = useState(false);
+	const [ cantPatch, setcantPatch ] = useState(false);
+	
+	const [ tenantId, setTenantId ] = useState(0);
+	const [ userId, setUserId ] = useState(0);
 
 	async function fetchProduct() {
 		await client.reAuthenticate();
@@ -122,22 +101,23 @@ const UserTable = () => {
 
 	const handleClickOpen = () => {
 		setId(0);
-		setPermissionId(0);
-		setRoleId(0);
-		setCantPatch(false);
+		setTenantId(0);
+		setUserId(0);
+		setcantPatch(false);
 		setOpen(true);
 	};
 
 	const handleClickOpenNoreset = () => {
-		setCantPatch(true);
+		setcantPatch(true);
 		setOpen(true);
 	};
 
-	const handlePermissionIdChange = (event: { target: { value: string; }; }) => {
-		setPermissionId(parseInt(event.target.value));
+	const handleTenantIdChange = (event: { target: { value: string; }; }) => {
+		setTenantId(parseInt(event.target.value));
 	};
-	const handleRoleIdChange = (event: { target: { value: string; }}) => {
-		setRoleId(parseInt(event.target.value));
+
+	const handleUserIdChange = (event: { target: { value: string; }; }) => {
+		setUserId(parseInt(event.target.value));
 	};
 
 	const handleClose = () => {
@@ -160,11 +140,9 @@ const UserTable = () => {
 				fetchProduct();
 				setOpen(false);
 			} catch (error) {
-				if (error instanceof Error) {
-					setAlertMessage(error.toString());
-					setAlertSeverity('error');
-					setAlertOpen(true);
-				}
+				// eslint-disable-next-line no-console
+				console.log(error);
+				// if data already exists we cant add it TODO
 			}
 		}
 	};
@@ -177,8 +155,8 @@ const UserTable = () => {
 				await client.reAuthenticate();
 				const log = await client.service(serviceName).create(
 					{ 
-						roleId: roleId,
-						permissionId: permissionId
+						tenantId: tenantId,
+						userId: userId
 					}
 				);
 
@@ -188,11 +166,9 @@ const UserTable = () => {
 				fetchProduct();
 				setOpen(false);
 			} catch (error) {
-				if (error instanceof Error) {
-					setAlertMessage(error.toString());
-					setAlertSeverity('error');
-					setAlertOpen(true);
-				}
+				// eslint-disable-next-line no-console
+				console.log(error);
+				// if data already exists we cant add it TODO
 			}
 		} else if (id != 0) {
 			try {
@@ -200,8 +176,8 @@ const UserTable = () => {
 				const log = await client.service(serviceName).patch(
 					id,
 					{ 
-						roleId: roleId,
-						permissionId: permissionId
+						tenantId: tenantId,
+						userId: userId
 					}
 				);
 
@@ -211,22 +187,12 @@ const UserTable = () => {
 				setOpen(false);
 
 			} catch (error) {
-				if (error instanceof Error) {
-					setAlertMessage(error.toString());
-					setAlertSeverity('error');
-					setAlertOpen(true);
-				}
+				// eslint-disable-next-line no-console
+				console.log(error);
+				// if data already exists we cant add it TODO
 			}
 		}
 
-	};
-
-	const handleAlertClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-		if (reason === 'clickaway') {
-			return;
-		}
-  
-		setAlertOpen(false);
 	};
 
 	return <>
@@ -235,12 +201,6 @@ const UserTable = () => {
 				Add new
 			</Button>
 			<hr/>
-			<Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleAlertClose}>
-				<Alert onClose={handleAlertClose} severity={alertSeverity} sx={{ width: '100%' }}>
-					{alertMessage}
-				</Alert>
-			</Snackbar>
-			
 			<Dialog open={open} onClose={handleClose}>
 				<DialogTitle>Add/Edit</DialogTitle>
 				<DialogContent>
@@ -251,29 +211,29 @@ const UserTable = () => {
 					<TextField
 						autoFocus
 						margin="dense"
-						id="permissionId"
-						label="permissionId"
+						id="tenantId"
+						label="tenantId"
 						type="number"
 						required
 						fullWidth
-						onChange={handlePermissionIdChange}
-						value={permissionId}
+						onChange={handleTenantIdChange}
+						value={tenantId}
 					/>
 					<TextField
 						autoFocus
 						margin="dense"
-						id="roleId"
-						label="roleId"
+						id="userId"
+						label="userId"
 						type="number"
 						required
 						fullWidth
-						onChange={handleRoleIdChange}
-						value={roleId}
+						onChange={handleUserIdChange}
+						value={userId}
 					/>
-					
+
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={delTenant} disabled={cantDelete} color='warning'>Delete</Button>
+					<Button onClick={delTenant} color='warning'>Delete</Button>
 					<Button onClick={handleClose}>Cancel</Button>
 					<Button onClick={addTenant} disabled={cantPatch}>OK</Button>
 				</DialogActions>
@@ -286,21 +246,21 @@ const UserTable = () => {
 					const r = row.getAllCells();
 
 					const tid = r[0].getValue();
-					const tpermissionId=r[2].getValue();
-					const troleId=r[3].getValue();
+					const ttenantId=r[1].getValue();
+					const tuserId=r[2].getValue();
 					
 					if (typeof tid === 'number') {
 						setId(tid);
 					}
-					if (typeof tpermissionId === 'string') {
-						setPermissionId(parseInt(tpermissionId));
+					if (typeof ttenantId === 'string') {
+						setTenantId(parseInt(ttenantId));
 					} else {
-						setPermissionId(0);
+						setTenantId(0);
 					}
-					if (typeof troleId === 'string') {
-						setRoleId(parseInt(troleId));
+					if (typeof tuserId === 'string') {
+						setUserId(parseInt(tuserId));
 					} else {
-						setRoleId(0);
+						setUserId(0);
 					}
 
 					handleClickOpenNoreset();

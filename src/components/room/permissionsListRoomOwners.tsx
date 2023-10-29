@@ -14,15 +14,16 @@ gourps/users/rooms
 import { useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Snackbar } from '@mui/material';
 import React from 'react';
+import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
 
 import io from 'socket.io-client';
 import { feathers } from '@feathersjs/feathers';
 import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../../utils/edumeetConfig';
-import { TenantOwners } from './permissionTypes';
+import { RoomOwners } from '../permission_stuff/permissionTypes';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 
@@ -37,11 +38,22 @@ client.configure(authentication());
 // nested data is ok, see accessorKeys in ColumnDef below
 
 const UserTable = () => {
-	const serviceName='tenantAdmins';
+	const serviceName='roomOwners';
+
+	const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+		props,
+		ref,
+	) {
+		return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+	});
+
+	const [ alertOpen, setAlertOpen ] = React.useState(false);
+	const [ alertMessage, setAlertMessage ] = React.useState('');
+	const [ alertSeverity, setAlertSeverity ] = React.useState<AlertColor>('success');
 
 	// should be memoized or stable
 	// eslint-disable-next-line camelcase
-	const columns = useMemo<MRT_ColumnDef<TenantOwners>[]>(
+	const columns = useMemo<MRT_ColumnDef<RoomOwners>[]>(
 		() => [
 
 			{
@@ -49,8 +61,8 @@ const UserTable = () => {
 				header: 'id'
 			},
 			{
-				accessorKey: 'tenantId',
-				header: 'tenantId'
+				accessorKey: 'roomId',
+				header: 'roomId'
 			},
 			{
 				accessorKey: 'userId',
@@ -65,7 +77,7 @@ const UserTable = () => {
 	const [ id, setId ] = useState(0);
 	const [ cantPatch, setcantPatch ] = useState(false);
 	
-	const [ tenantId, setTenantId ] = useState(0);
+	const [ roomId, setRoomId ] = useState(0);
 	const [ userId, setUserId ] = useState(0);
 
 	async function fetchProduct() {
@@ -101,7 +113,7 @@ const UserTable = () => {
 
 	const handleClickOpen = () => {
 		setId(0);
-		setTenantId(0);
+		setRoomId(0);
 		setUserId(0);
 		setcantPatch(false);
 		setOpen(true);
@@ -112,8 +124,8 @@ const UserTable = () => {
 		setOpen(true);
 	};
 
-	const handleTenantIdChange = (event: { target: { value: string; }; }) => {
-		setTenantId(parseInt(event.target.value));
+	const handleRoomIdChange = (event: { target: { value: string; }; }) => {
+		setRoomId(parseInt(event.target.value));
 	};
 
 	const handleUserIdChange = (event: { target: { value: string; }; }) => {
@@ -140,9 +152,11 @@ const UserTable = () => {
 				fetchProduct();
 				setOpen(false);
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		}
 	};
@@ -155,7 +169,7 @@ const UserTable = () => {
 				await client.reAuthenticate();
 				const log = await client.service(serviceName).create(
 					{ 
-						tenantId: tenantId,
+						roomId: roomId,
 						userId: userId
 					}
 				);
@@ -166,9 +180,11 @@ const UserTable = () => {
 				fetchProduct();
 				setOpen(false);
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		} else if (id != 0) {
 			try {
@@ -176,7 +192,7 @@ const UserTable = () => {
 				const log = await client.service(serviceName).patch(
 					id,
 					{ 
-						tenantId: tenantId,
+						roomId: roomId,
 						userId: userId
 					}
 				);
@@ -187,12 +203,22 @@ const UserTable = () => {
 				setOpen(false);
 
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		}
 
+	};
+
+	const handleAlertClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+		if (reason === 'clickaway') {
+			return;
+		}
+  
+		setAlertOpen(false);
 	};
 
 	return <>
@@ -201,6 +227,12 @@ const UserTable = () => {
 				Add new
 			</Button>
 			<hr/>
+			<Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleAlertClose}>
+				<Alert onClose={handleAlertClose} severity={alertSeverity} sx={{ width: '100%' }}>
+					{alertMessage}
+				</Alert>
+			</Snackbar>
+			
 			<Dialog open={open} onClose={handleClose}>
 				<DialogTitle>Add/Edit</DialogTitle>
 				<DialogContent>
@@ -211,13 +243,13 @@ const UserTable = () => {
 					<TextField
 						autoFocus
 						margin="dense"
-						id="tenantId"
-						label="tenantId"
+						id="roomId"
+						label="roomId"
 						type="number"
 						required
 						fullWidth
-						onChange={handleTenantIdChange}
-						value={tenantId}
+						onChange={handleRoomIdChange}
+						value={roomId}
 					/>
 					<TextField
 						autoFocus
@@ -246,16 +278,16 @@ const UserTable = () => {
 					const r = row.getAllCells();
 
 					const tid = r[0].getValue();
-					const ttenantId=r[1].getValue();
+					const troomId=r[1].getValue();
 					const tuserId=r[2].getValue();
 					
 					if (typeof tid === 'number') {
 						setId(tid);
 					}
-					if (typeof ttenantId === 'string') {
-						setTenantId(parseInt(ttenantId));
+					if (typeof troomId === 'string') {
+						setRoomId(parseInt(troomId));
 					} else {
-						setTenantId(0);
+						setRoomId(0);
 					}
 					if (typeof tuserId === 'string') {
 						setUserId(parseInt(tuserId));

@@ -16,14 +16,14 @@ import { useEffect, useMemo, useState } from 'react';
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
 import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Snackbar } from '@mui/material';
 import React from 'react';
-import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
 
 import io from 'socket.io-client';
 import { feathers } from '@feathersjs/feathers';
 import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../../utils/edumeetConfig';
-import { RoomOwners } from './permissionTypes';
+import { RolePermissions, Permissions } from '../permission_stuff/permissionTypes';
+import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 
@@ -38,7 +38,7 @@ client.configure(authentication());
 // nested data is ok, see accessorKeys in ColumnDef below
 
 const UserTable = () => {
-	const serviceName='roomOwners';
+	const serviceName='rolePermissions';
 
 	const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 		props,
@@ -53,7 +53,7 @@ const UserTable = () => {
 
 	// should be memoized or stable
 	// eslint-disable-next-line camelcase
-	const columns = useMemo<MRT_ColumnDef<RoomOwners>[]>(
+	const columns = useMemo<MRT_ColumnDef<RolePermissions>[]>(
 		() => [
 
 			{
@@ -61,13 +61,22 @@ const UserTable = () => {
 				header: 'id'
 			},
 			{
-				accessorKey: 'roomId',
-				header: 'roomId'
+				accessorKey: 'permission',
+				header: 'permission',
+				Cell: ({ cell }) =>
+					(	
+						cell.getValue<Permissions>()['name']
+					)
 			},
 			{
-				accessorKey: 'userId',
-				header: 'userId'
+				accessorKey: 'permissionId',
+				header: 'permissionId'
 			},
+			{
+				accessorKey: 'roleId',
+				header: 'roleId'
+			},
+
 		],
 		[],
 	);
@@ -75,10 +84,10 @@ const UserTable = () => {
 	const [ data, setData ] = useState([]);
 	const [ isLoading, setIsLoading ] = useState(false);
 	const [ id, setId ] = useState(0);
-	const [ cantPatch, setcantPatch ] = useState(false);
-	
-	const [ roomId, setRoomId ] = useState(0);
-	const [ userId, setUserId ] = useState(0);
+	const [ permissionId, setPermissionId ] = useState(0);
+	const [ roleId, setRoleId ] = useState(0);
+	const [ cantPatch, setCantPatch ] = useState(true);
+	const [ cantDelete ] = useState(false);
 
 	async function fetchProduct() {
 		await client.reAuthenticate();
@@ -113,23 +122,22 @@ const UserTable = () => {
 
 	const handleClickOpen = () => {
 		setId(0);
-		setRoomId(0);
-		setUserId(0);
-		setcantPatch(false);
+		setPermissionId(0);
+		setRoleId(0);
+		setCantPatch(false);
 		setOpen(true);
 	};
 
 	const handleClickOpenNoreset = () => {
-		setcantPatch(true);
+		setCantPatch(true);
 		setOpen(true);
 	};
 
-	const handleRoomIdChange = (event: { target: { value: string; }; }) => {
-		setRoomId(parseInt(event.target.value));
+	const handlePermissionIdChange = (event: { target: { value: string; }; }) => {
+		setPermissionId(parseInt(event.target.value));
 	};
-
-	const handleUserIdChange = (event: { target: { value: string; }; }) => {
-		setUserId(parseInt(event.target.value));
+	const handleRoleIdChange = (event: { target: { value: string; }}) => {
+		setRoleId(parseInt(event.target.value));
 	};
 
 	const handleClose = () => {
@@ -169,8 +177,8 @@ const UserTable = () => {
 				await client.reAuthenticate();
 				const log = await client.service(serviceName).create(
 					{ 
-						roomId: roomId,
-						userId: userId
+						roleId: roleId,
+						permissionId: permissionId
 					}
 				);
 
@@ -192,8 +200,8 @@ const UserTable = () => {
 				const log = await client.service(serviceName).patch(
 					id,
 					{ 
-						roomId: roomId,
-						userId: userId
+						roleId: roleId,
+						permissionId: permissionId
 					}
 				);
 
@@ -243,29 +251,29 @@ const UserTable = () => {
 					<TextField
 						autoFocus
 						margin="dense"
-						id="roomId"
-						label="roomId"
+						id="permissionId"
+						label="permissionId"
 						type="number"
 						required
 						fullWidth
-						onChange={handleRoomIdChange}
-						value={roomId}
+						onChange={handlePermissionIdChange}
+						value={permissionId}
 					/>
 					<TextField
 						autoFocus
 						margin="dense"
-						id="userId"
-						label="userId"
+						id="roleId"
+						label="roleId"
 						type="number"
 						required
 						fullWidth
-						onChange={handleUserIdChange}
-						value={userId}
+						onChange={handleRoleIdChange}
+						value={roleId}
 					/>
-
+					
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={delTenant} color='warning'>Delete</Button>
+					<Button onClick={delTenant} disabled={cantDelete} color='warning'>Delete</Button>
 					<Button onClick={handleClose}>Cancel</Button>
 					<Button onClick={addTenant} disabled={cantPatch}>OK</Button>
 				</DialogActions>
@@ -278,21 +286,21 @@ const UserTable = () => {
 					const r = row.getAllCells();
 
 					const tid = r[0].getValue();
-					const troomId=r[1].getValue();
-					const tuserId=r[2].getValue();
+					const tpermissionId=r[2].getValue();
+					const troleId=r[3].getValue();
 					
 					if (typeof tid === 'number') {
 						setId(tid);
 					}
-					if (typeof troomId === 'string') {
-						setRoomId(parseInt(troomId));
+					if (typeof tpermissionId === 'string') {
+						setPermissionId(parseInt(tpermissionId));
 					} else {
-						setRoomId(0);
+						setPermissionId(0);
 					}
-					if (typeof tuserId === 'string') {
-						setUserId(parseInt(tuserId));
+					if (typeof troleId === 'string') {
+						setRoleId(parseInt(troleId));
 					} else {
-						setUserId(0);
+						setRoleId(0);
 					}
 
 					handleClickOpenNoreset();
