@@ -160,14 +160,14 @@ const TenantTable = () => {
 	const handleClickOpen = () => {
 		setId(0);
 		setTenantId(0);
-		setProfileUrl('');
-		setKey('');
+		setProfileUrl('https://edumeet.example.com/kc/realms/<realm>/protocol/openid-connect/userinfo');
+		setKey('edumeet-dev-client');
 		setSecret('');
-		setAuthorizeUrl('');
-		setAccessUrl('');
-		setScope('');
-		setScopeDelimeter('');
-		setRedirect('');
+		setAuthorizeUrl('https://edumeet.example.com/kc/realms/<realm>/protocol/openid-connect/auth');
+		setAccessUrl('https://edumeet.example.com/kc/realms/<realm>/protocol/openid-connect/token');
+		setScope('openid profile email');
+		setScopeDelimeter(' ');
+		setRedirect('https://edumeet.example.com/mgmt/oauth/tenant/callback');
 		setOpen(true);
 	};
 
