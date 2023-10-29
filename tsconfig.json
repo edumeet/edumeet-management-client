@@ -23,6 +23,8 @@
 		"types": [ "@types/wicg-file-system-access", "@types/jest" ],
 	},
 	"include": [
-		"src/**/*"
+		"src/**/*",
+		"public/config/config.js",
+		"public/config/config.example.js"
 	]
 }

@@ -11,7 +11,7 @@ gourps/users/rooms
 
 */
 
-import { SyntheticEvent, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
 import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, FormControlLabel, Checkbox, Autocomplete, Snackbar } from '@mui/material';
@@ -273,12 +273,13 @@ const UserTable = () => {
 	const handleDescriptionChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
 		setDescription(event.target.value);
 	};
-	const handleTenantIdChange = (event: SyntheticEvent<Element, Event>, newValue: Tenant) => {
+
+	/* const handleTenantIdChange = (event: SyntheticEvent<Element, Event>, newValue: Tenant) => {
 		if (newValue) {
 			setTenantId(newValue.id);
 			setTenantIdOption(newValue);
 		}
-	};
+	}; */
 
 	const handleLogoChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
 		setLogo(event.target.value);
@@ -479,8 +480,9 @@ const UserTable = () => {
 						getOptionLabel={(option) => option.name}
 						fullWidth
 						disableClearable
+						readOnly
 						id="combo-box-demo"
-						onChange={handleTenantIdChange}
+						// onChange={handleTenantIdChange}
 						value={tenantIdOption}
 						sx={{ marginTop: '8px' }}
 						renderInput={(params) => <TextField {...params} label="Tenant" />}
