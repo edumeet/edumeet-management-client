@@ -23,7 +23,7 @@ import { feathers } from '@feathersjs/feathers';
 import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../../utils/edumeetConfig';
-import { GroupUsers } from './groupTypes';
+import Groups, { GroupUsers } from './groupTypes';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 
@@ -51,6 +51,25 @@ const UserTable = () => {
 	const [ alertMessage, setAlertMessage ] = React.useState('');
 	const [ alertSeverity, setAlertSeverity ] = React.useState<AlertColor>('success');
 
+	type GroupsTypes = Array<Groups>
+
+	const [ groups, setGroups ] = useState<GroupsTypes>([ {
+		id: 0,
+		name: 'string',   
+		description: 'string',
+		tenantId: 0 
+	} ]);
+
+	const getGroupName = (id: string): string => {
+		const t = groups.find((type) => type.id === parseInt(id));
+
+		if (t && t.name) {
+			return t.name;
+		} else {
+			return 'undefined group';
+		}
+	};
+
 	// should be memoized or stable
 	// eslint-disable-next-line camelcase
 	const columns = useMemo<MRT_ColumnDef<GroupUsers>[]>(
@@ -62,14 +81,15 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'groupId',
-				header: 'groupId'
+				header: 'groupId',
+				Cell: ({ cell }) => getGroupName(cell.getValue<string>())
 			},
 			{
 				accessorKey: 'userId',
 				header: 'userId'
 			}
 		],
-		[],
+		[ groups ],
 	);
 
 	const [ data, setData ] = useState([]);
@@ -84,6 +104,18 @@ const UserTable = () => {
 
 	async function fetchProduct() {
 		await client.reAuthenticate();
+		const g = await client.service('groups').find(
+			{
+				query: {
+					$sort: {
+						id: 1
+					}
+				}
+			}
+		);
+
+		setGroups(g.data);
+
 		// Find all users
 		const user = await client.service(serviceName).find(
 			{
