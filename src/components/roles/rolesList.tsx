@@ -362,6 +362,8 @@ const UserTable = () => {
 				console.log(c);
 
 			});
+			fetchProduct();
+
 		}
 
 	};
