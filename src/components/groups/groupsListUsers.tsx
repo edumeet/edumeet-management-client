@@ -216,7 +216,7 @@ const UserTable = () => {
 		}
 	};
 
-	const handleUserIdChange = (event: SyntheticEvent<Element, Event>, newValue: Roles) => {
+	const handleUserIdChange = (event: SyntheticEvent<Element, Event>, newValue: User) => {
 		if (newValue) {
 			setUserId(newValue.id);
 			setUserIdOption(newValue);
