@@ -11,10 +11,10 @@ gourps/users/rooms
 
 */
 
-import { useEffect, useMemo, useState } from 'react';
+import { SyntheticEvent, useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Snackbar } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Snackbar, Autocomplete } from '@mui/material';
 import React from 'react';
 import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
 
@@ -24,6 +24,7 @@ import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../../utils/edumeetConfig';
 import Groups, { GroupUsers } from './groupTypes';
+import User from '../user/userTypes';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 
@@ -52,12 +53,25 @@ const UserTable = () => {
 	const [ alertSeverity, setAlertSeverity ] = React.useState<AlertColor>('success');
 
 	type GroupsTypes = Array<Groups>
+	type UserTypes = Array<User>
 
 	const [ groups, setGroups ] = useState<GroupsTypes>([ {
 		id: 0,
 		name: 'string',   
 		description: 'string',
 		tenantId: 0 
+	} ]);
+
+	const [ users, setUsers ] = useState<UserTypes>([ {
+		'id': 0,
+		'ssoId': '',
+		'tenantId': 0,
+		'email': '',
+		'name': '',
+		'avatar': '',
+		'roles': [],
+		'tenantAdmin': false,
+		'tenantOwner': false
 	} ]);
 
 	const getGroupName = (id: string): string => {
@@ -67,6 +81,15 @@ const UserTable = () => {
 			return t.name;
 		} else {
 			return 'undefined group';
+		}
+	};
+	const getUserEmail = (id: string): string => {
+		const t = users.find((type) => type.id === parseInt(id));
+
+		if (t && t.email) {
+			return t.email;
+		} else {
+			return 'no such email';
 		}
 	};
 
@@ -86,10 +109,12 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'userId',
-				header: 'userId'
+				header: 'userId',
+				Cell: ({ cell }) => getUserEmail(cell.getValue<string>())
+
 			}
 		],
-		[ groups ],
+		[ groups, users ],
 	);
 
 	const [ data, setData ] = useState([]);
@@ -102,6 +127,9 @@ const UserTable = () => {
 	const [ groupIdDisabled, setGroupIdDisabled ] = useState(false);
 	const [ userIdDisabled, setUserIdDisabled ] = useState(false);
 
+	const [ groupIdOption, setGroupIdOption ] = useState<Groups | undefined>();
+	const [ userIdOption, setUserIdOption ] = useState<User | undefined>();
+	
 	async function fetchProduct() {
 		await client.reAuthenticate();
 		const g = await client.service('groups').find(
@@ -115,6 +143,21 @@ const UserTable = () => {
 		);
 
 		setGroups(g.data);
+
+		const u = await client.service('users').find(
+			{
+				query: {
+					$sort: {
+						id: 1
+					}
+				}
+			}
+		);
+
+		// eslint-disable-next-line no-console
+		console.log(u);
+
+		setUsers(u.data);
 
 		// Find all users
 		const user = await client.service(serviceName).find(
@@ -151,25 +194,34 @@ const UserTable = () => {
 		setGroupIdDisabled(false);
 		setUserId(0);
 		setUserIdDisabled(false);
+		setUserIdOption(undefined);
+		setGroupIdOption(undefined);
 		setCantPatch(false);
 		setOpen(true);
 	};
 
 	const handleClickOpenNoreset = () => {
-		setGroupIdDisabled(false);
-		setUserIdDisabled(false);
+		setGroupIdDisabled(true);
+		
+		setUserIdDisabled(true);
+		
 		setCantPatch(true);
 		setOpen(true);
 	};
 
-	const handleGroupIdChange = (event: { target: { value: string; }; }) => {
-		setGroupId(parseInt(event.target.value));
+	const handleGroupIdChange = (event: SyntheticEvent<Element, Event>, newValue: Groups) => {
+		if (newValue) {
+			setGroupId(newValue.id);
+			setGroupIdOption(newValue);
+		}
 	};
 
-	const handleUserIdChange = (event: { target: { value: string; }; }) => {
-		setUserId(parseInt(event.target.value));
+	const handleUserIdChange = (event: SyntheticEvent<Element, Event>, newValue: Roles) => {
+		if (newValue) {
+			setUserId(newValue.id);
+			setUserIdOption(newValue);
+		}
 	};
-
 	const handleClose = () => {
 		setOpen(false);
 	};
@@ -287,7 +339,7 @@ const UserTable = () => {
 						These are the parameters that you can change.
 					</DialogContentText>
 					<input type="hidden" name="id" value={id} />
-					<TextField
+					{/* 					<TextField
 						autoFocus
 						margin="dense"
 						id="groupId"
@@ -298,8 +350,19 @@ const UserTable = () => {
 						disabled={groupIdDisabled}
 						onChange={handleGroupIdChange}
 						value={groupId}
+					/> */}
+					<Autocomplete
+						options={groups}
+						getOptionLabel={(option) => option.name}
+						fullWidth
+						disableClearable
+						readOnly={groupIdDisabled}
+						onChange={handleGroupIdChange}
+						value={groupIdOption}
+						sx={{ marginTop: '8px' }}
+						renderInput={(params) => <TextField {...params} label="Group" />}
 					/>
-					<TextField
+					{/* 					<TextField
 						autoFocus
 						margin="dense"
 						id="userId"
@@ -310,6 +373,17 @@ const UserTable = () => {
 						disabled={userIdDisabled}
 						onChange={handleUserIdChange}
 						value={userId}
+					/> */}
+					<Autocomplete
+						options={users}
+						getOptionLabel={(option) => option.email}
+						fullWidth
+						disableClearable
+						readOnly={userIdDisabled}
+						onChange={handleUserIdChange}
+						value={userIdOption}
+						sx={{ marginTop: '8px' }}
+						renderInput={(params) => <TextField {...params} label="User" />}
 					/>
 				</DialogContent>
 				<DialogActions>
@@ -332,12 +406,24 @@ const UserTable = () => {
 					if (typeof tid === 'number') {
 						setId(tid);
 					}
+
 					if (typeof tgroupId === 'string') {
+						const tgroup = groups.find((x) => x.id === parseInt(tgroupId));
+
+						if (tgroup) {
+							setGroupIdOption(tgroup);
+						}
 						setGroupId(parseInt(tgroupId));
 					} else {
 						setGroupId(0);
 					}
+
 					if (typeof tuserId === 'string') {
+						const tuser = users.find((x) => x.id === parseInt(tuserId));
+
+						if (tuser) {
+							setUserIdOption(tuser);
+						}
 						setUserId(parseInt(tuserId));
 					} else {
 						setUserId(0);
