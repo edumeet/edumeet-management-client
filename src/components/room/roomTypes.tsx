@@ -9,6 +9,7 @@ export type Room = {
 	createdAt: string,
 	updatedAt: string,
 	creatorId: string,
+	defaultRoleId : string,
 	tenantId?: number | null,
 	logo: string | null,
 	background: string | null,
@@ -19,6 +20,7 @@ export type Room = {
 	filesharingEnabled: boolean,
 	groupRoles: Array<Roles>,
 	localRecordingEnabled: boolean,
-	owners: Array<RoomOwners>
+	owners: Array<RoomOwners>,
+	breakoutsEnabled: boolean,
 };
 export default Room;

@@ -11,7 +11,7 @@ gourps/users/rooms
 
 */
 
-import { useEffect, useMemo, useState } from 'react';
+import { SyntheticEvent, useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
 import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, FormControlLabel, Checkbox, Autocomplete, Snackbar } from '@mui/material';
@@ -23,7 +23,7 @@ import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../../utils/edumeetConfig';
 import { RoomOwners } from '../permission_stuff/permissionTypes';
-import { GroupRoles } from '../roles/roleTypes';
+import { Roles, GroupRoles } from '../roles/roleTypes';
 import { Room } from './roomTypes';
 import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
 import { Tenant } from '../tenant/tenant/tenantTypes';
@@ -54,6 +54,10 @@ const UserTable = () => {
 
 	const [ tenants, setTenants ] = useState<TenantOptionTypes>([ { 'id': 0, 'name': '', 'description': '' } ]);
 
+	type RoleTypes = Array<Roles>
+
+	const [ roles, setRoles ] = useState<RoleTypes>([ { 'description': 'Test', 'id': 1, 'name': 'Test', 'tenantId': 1, 'permissions': [] } ]);
+
 	const [ alertOpen, setAlertOpen ] = React.useState(false);
 	const [ alertMessage, setAlertMessage ] = React.useState('');
 	const [ alertSeverity, setAlertSeverity ] = React.useState<AlertColor>('success');
@@ -65,6 +69,16 @@ const UserTable = () => {
 			return t.name;
 		} else {
 			return 'undefined tenant';
+		}
+	};
+
+	const getRoleName = (id: string): string => {
+		const t = roles.find((type) => type.id === parseInt(id));
+
+		if (t && t.name) {
+			return t.name;
+		} else {
+			return 'No default role';
 		}
 	};
 
@@ -98,6 +112,12 @@ const UserTable = () => {
 			{
 				accessorKey: 'creatorId',
 				header: 'Creator id'
+			},
+			{
+				accessorKey: 'defaultRoleId',
+				header: 'Default Role',
+				Cell: ({ cell }) => getRoleName(cell.getValue<string>())
+
 			},
 			{
 				accessorKey: 'tenantId',
@@ -171,9 +191,16 @@ const UserTable = () => {
 							.join(', ')
 					),
 			},
+			{
+				accessorKey: 'breakoutsEnabled',
+				header: 'Breakouts Enabled',
+				Cell: ({ cell }) =>
+					(cell.getValue() === true ? 'yes' : 'no'),
+				filterVariant: 'checkbox'
+			},
 			
 		],
-		[ tenants ],
+		[ tenants, roles ],
 	);
 
 	const [ data, setData ] = useState([]);
@@ -184,6 +211,11 @@ const UserTable = () => {
 	const [ description, setDescription ] = useState('');
 	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 	const [ tenantId, setTenantId ] = useState(0);
+	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+	const [ defaultRoleId, setDefaultRoletId ] = useState(0);
+
+	const [ breakoutsEnabled, setBreakoutsEnabled ] = useState(false);
+
 	const [ logo, setLogo ] = useState('');
 	const [ background, setBackground ] = useState('');
 	const [ maxActiveVideos, setMaxActiveVideos ] = useState(0);
@@ -193,6 +225,7 @@ const UserTable = () => {
 	const [ filesharingEnabled, setFilesharingEnabled ] = useState(false);
 	const [ localRecordingEnabled, setLocalRecordingEnabled ] = useState(false);
 	const [ tenantIdOption, setTenantIdOption ] = useState<Tenant | undefined>();
+	const [ defaultRoleIdOption, setDefaultRoleIdOption ] = useState<Roles | undefined>();
 
 	const [ cantPatch ] = useState(false);
 	const [ cantDelete ] = useState(false);
@@ -214,6 +247,22 @@ const UserTable = () => {
 		// eslint-disable-next-line no-console
 		console.log(t);
 		setTenants(t.data);
+
+		const r = await client.service('roles').find(
+			{
+				query: {
+					$sort: {
+						id: 1
+					}
+				}
+			}
+		);
+
+		// eslint-disable-next-line no-console
+		console.log('r');
+		// eslint-disable-next-line no-console
+		console.log(r);
+		setRoles(r.data);
 
 		// Find all users
 		const user = await client.service(serviceName).find(
@@ -250,6 +299,9 @@ const UserTable = () => {
 		setName('');
 		setDescription('');
 		setTenantId(0);
+		setTenantIdOption(undefined);
+		setDefaultRoletId(0);
+		setDefaultRoleIdOption(undefined);
 		setLogo('');
 		setBackground('');
 		setMaxActiveVideos(0);
@@ -272,6 +324,13 @@ const UserTable = () => {
 	};
 	const handleDescriptionChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
 		setDescription(event.target.value);
+	};
+
+	const handleDefaultRoleIdChange = (event: SyntheticEvent<Element, Event>, newValue: Roles) => {
+		if (newValue) {
+			setDefaultRoletId(newValue.id);
+			setDefaultRoleIdOption(newValue);
+		}
 	};
 
 	/* const handleTenantIdChange = (event: SyntheticEvent<Element, Event>, newValue: Tenant) => {
@@ -304,6 +363,9 @@ const UserTable = () => {
 	};
 	const handleLocalRecordingEnabledChange = (event: { target: { checked: React.SetStateAction<boolean>; }; }) => {
 		setLocalRecordingEnabled(event.target.checked);
+	};
+	const handleBreakoutsEnabledChange = (event: { target: { checked: React.SetStateAction<boolean>; }; }) => {
+		setBreakoutsEnabled(event.target.checked);
 	};
 	const handleClose = () => {
 		setOpen(false);
@@ -357,6 +419,8 @@ const UserTable = () => {
 						raiseHandEnabled: raiseHandEnabled,
 						filesharingEnabled: filesharingEnabled,
 						localRecordingEnabled: localRecordingEnabled,
+						breakoutsEnabled: breakoutsEnabled,
+						defaultRoleId: defaultRoleId
 
 					}
 				);
@@ -392,7 +456,8 @@ const UserTable = () => {
 						raiseHandEnabled: raiseHandEnabled,
 						filesharingEnabled: filesharingEnabled,
 						localRecordingEnabled: localRecordingEnabled,
-
+						breakoutsEnabled: breakoutsEnabled,
+						defaultRoleId: defaultRoleId
 					}
 				);
 
@@ -476,12 +541,21 @@ const UserTable = () => {
 						value={tenantId}
 					/> */}
 					<Autocomplete
+						options={roles}
+						getOptionLabel={(option) => option.name}
+						fullWidth
+						disableClearable
+						onChange={handleDefaultRoleIdChange}
+						value={defaultRoleIdOption}
+						sx={{ marginTop: '8px' }}
+						renderInput={(params) => <TextField {...params} label="Default Role" />}
+					/>
+					<Autocomplete
 						options={tenants}
 						getOptionLabel={(option) => option.name}
 						fullWidth
 						disableClearable
 						readOnly
-						id="combo-box-demo"
 						// onChange={handleTenantIdChange}
 						value={tenantIdOption}
 						sx={{ marginTop: '8px' }}
@@ -525,6 +599,8 @@ const UserTable = () => {
 					<FormControlLabel control={<Checkbox checked={raiseHandEnabled} onChange={handleRaiseHandEnabledChange} />} label="raiseHandEnabled" />
 					<FormControlLabel control={<Checkbox checked={filesharingEnabled} onChange={handleFilesharingEnabledChange} />} label="filesharingEnabled" />
 					<FormControlLabel control={<Checkbox checked={localRecordingEnabled} onChange={handleLocalRecordingEnabledChange} />} label="localRecordingEnabled" />
+					<FormControlLabel control={<Checkbox checked={breakoutsEnabled} onChange={handleBreakoutsEnabledChange} />} label="breakoutsEnabled" />
+					
 				</DialogContent>
 				<DialogActions>
 					<Button onClick={delTenant} disabled={cantDelete} color='warning'>Delete</Button>
@@ -542,15 +618,17 @@ const UserTable = () => {
 					const tid = r[0].getValue();
 					const tname=r[1].getValue();
 					const tdescription=r[2].getValue();
-					const ttenantId=r[6].getValue();
-					const tlogo=r[7].getValue();
-					const tbackground=r[8].getValue();
-					const tmaxActiveVideos=r[9].getValue();
-					const tlocked=r[10].getValue();
-					const tchatEnabled=r[11].getValue();
-					const traiseHandEnabled=r[12].getValue();
-					const tfilesharingEnabled=r[13].getValue();
-					const tlocalRecordingEnabled=r[14].getValue();
+					const tdefaultroleId=r[6].getValue();
+					const ttenantId=r[7].getValue();
+					const tlogo=r[8].getValue();
+					const tbackground=r[9].getValue();
+					const tmaxActiveVideos=r[10].getValue();
+					const tlocked=r[11].getValue();
+					const tchatEnabled=r[12].getValue();
+					const traiseHandEnabled=r[13].getValue();
+					const tfilesharingEnabled=r[14].getValue();
+					const tlocalRecordingEnabled=r[15].getValue();
+					const tbreakoutsEnabled=r[18].getValue();
 
 					if (typeof tid === 'number') {
 						setId(tid);
@@ -564,6 +642,20 @@ const UserTable = () => {
 						setDescription(tdescription);
 					} else {
 						setDescription('');
+					}
+
+					if (typeof tdefaultroleId === 'string') {
+						const tdefaultrole = roles.find((x) => x.id === parseInt(tdefaultroleId));
+
+						if (tdefaultrole) {
+							setDefaultRoleIdOption(tdefaultrole);
+						} else {
+							setDefaultRoleIdOption(undefined);
+						}
+						setDefaultRoletId(parseInt(tdefaultroleId));
+					} else {
+						setDefaultRoletId(0);
+						setDefaultRoleIdOption(undefined);
 					}
 					if (typeof ttenantId === 'string') {
 						const ttenant = tenants.find((x) => x.id === parseInt(ttenantId));
@@ -616,6 +708,11 @@ const UserTable = () => {
 						setLocalRecordingEnabled(true);
 					} else {
 						setLocalRecordingEnabled(false);
+					}
+					if (tbreakoutsEnabled === true) {
+						setBreakoutsEnabled(true);
+					} else {
+						setBreakoutsEnabled(false);
 					}
 
 					handleClickOpenNoreset();
