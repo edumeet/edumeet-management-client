@@ -23,6 +23,8 @@ import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../../utils/edumeetConfig';
 import { GroupRoles, Roles } from './roleTypes';
+import { Room } from '../room/roomTypes';
+import Groups from '../groups/groupTypes';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 
@@ -34,11 +36,88 @@ client.configure(socketio(socket));
 // Use localStorage to store our login token
 client.configure(authentication());
 
-// nested data is ok, see accessorKeys in ColumnDef below
-
 const UserTable = () => {
 	const serviceName='roomGroupRoles';
 
+	type RoomOptionTypes = Array<Room>
+
+	// nested data is ok, see accessorKeys in ColumnDef below
+	const [ rooms, setRooms ] = useState<RoomOptionTypes>([ {
+		'id': 1,
+		'name': '',
+		'description': '',
+		'createdAt': '',
+		'updatedAt': '',
+		'creatorId': '',
+		'defaultRoleId': '',
+		'tenantId': 1,
+		'logo': null,
+		'background': null,
+		'maxActiveVideos': 0,
+		'locked': true,
+		'chatEnabled': true,
+		'raiseHandEnabled': true,
+		'filesharingEnabled': true,
+		'groupRoles': [],
+		'localRecordingEnabled': true,
+		'owners': [],
+		'breakoutsEnabled': true,
+	}
+	]);
+	
+	type RolesOptionTypes = Array<Roles>
+
+	// nested data is ok, see accessorKeys in ColumnDef below
+	const [ roles, setRoles ] = useState<RolesOptionTypes>([ {
+		'id': 0,
+		'name': '',   
+		'description': '',
+		'tenantId': 0,
+		'permissions': []
+	}
+	]);
+
+	const getRoleName = (id: string): string => {
+		const t = roles.find((type) => type.id === parseInt(id));
+	
+		if (t && t.name) {
+			return t.name;
+		} else {
+			return 'undefined role';
+		}
+	};
+
+	type GroupsOptionTypes = Array<Groups>
+
+	// nested data is ok, see accessorKeys in ColumnDef below
+	const [ groups, setGroups ] = useState<GroupsOptionTypes>([ {
+		'id': 0,
+		'name': '',   
+		'description': '',
+		'tenantId': 0
+	}
+	]);
+
+	const getGroupsName = (id: string): string => {
+		const t = groups.find((type) => type.id === parseInt(id));
+	
+		if (t && t.name) {
+			return t.name;
+		} else {
+			return 'undefined role';
+		}
+	};
+
+	const getRoomName = (id: string): string => {
+		const t = rooms.find((type) => type.id === parseInt(id));
+	
+		if (t && t.name) {
+			return t.name;
+		} else {
+			return 'undefined room';
+		}
+	};
+	
 	// should be memoized or stable
 	// eslint-disable-next-line camelcase
 	const columns = useMemo<MRT_ColumnDef<GroupRoles>[]>(
@@ -49,15 +128,21 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'groupId',
-				header: 'groupId'
+				header: 'groupId',
+				Cell: ({ cell }) => getGroupsName(cell.getValue<string>())
+
 			},
 			{
 				accessorKey: 'roleId',
-				header: 'roleId'
+				header: 'roleId',
+				Cell: ({ cell }) => getRoleName(cell.getValue<string>())
+
 			},
 			{
 				accessorKey: 'roomId',
-				header: 'roomId'
+				header: 'roomId',
+				Cell: ({ cell }) => getRoomName(cell.getValue<string>())
+
 			},
 			{
 				accessorKey: 'role',
@@ -68,7 +153,7 @@ const UserTable = () => {
 					),
 			},
 		],
-		[],
+		[ rooms, roles, groups ],
 	);
 
 	const [ data, setData ] = useState([]);
@@ -83,6 +168,54 @@ const UserTable = () => {
 
 	async function fetchProduct() {
 		await client.reAuthenticate();
+
+		const g = await client.service('groups').find(
+			{
+				query: {
+					$sort: {
+						id: 1
+					}
+				}
+			}
+		);
+
+		// eslint-disable-next-line no-console
+		console.log('g');
+		// eslint-disable-next-line no-console
+		console.log(g);
+		setGroups(g.data);
+
+		const r = await client.service('rooms').find(
+			{
+				query: {
+					$sort: {
+						id: 1
+					}
+				}
+			}
+		);
+
+		// eslint-disable-next-line no-console
+		console.log('r');
+		// eslint-disable-next-line no-console
+		console.log(r);
+		setRooms(r.data);
+		const ro = await client.service('roles').find(
+			{
+				query: {
+					$sort: {
+						id: 1
+					}
+				}
+			}
+		);
+
+		// eslint-disable-next-line no-console
+		console.log('ro');
+		// eslint-disable-next-line no-console
+		console.log(ro);
+		setRoles(ro.data);
+		
 		// Find all users
 		const user = await client.service(serviceName).find(
 			{
