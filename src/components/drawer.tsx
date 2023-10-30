@@ -28,7 +28,7 @@ import edumeetConfig from '../utils/edumeetConfig';
 import UserTable from './user/user';
 import GroupTable from './groups/groups';
 import RoleTable from './roles/roles';
-import PermissionTable from './permission_stuff/permissions';
+// import PermissionTable from './permission_stuff/permissions';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
@@ -255,7 +255,7 @@ export default function ResponsiveDrawer(props: Props) {
 						<Route path="/cli/users" Component={UserTable} />
 						<Route path="/cli/groups" Component={GroupTable} />
 						<Route path="/cli/roles" Component={RoleTable} />
-						<Route path="/cli/permissions" Component={PermissionTable} />
+						{/* <Route path="/cli/permissions" Component={PermissionTable} /> */}
 						<Route path="/cli/products/:id" Component={Product} />
 					</Routes>
 
