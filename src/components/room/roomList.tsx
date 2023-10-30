@@ -310,6 +310,7 @@ const UserTable = () => {
 		setRaiseHandEnabled(true);
 		setFilesharingEnabled(true);
 		setLocalRecordingEnabled(true);
+		setBreakoutsEnabled(true);
 
 		setOpen(true);
 	};
@@ -406,27 +407,48 @@ const UserTable = () => {
 		if (name != '' && id === 0) {
 			try {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-				const user = await client.reAuthenticate();
-				const log = await client.service(serviceName).create(
-					{ 
-						name: name,
-						description: description,
-						logo: logo,
-						background: background,
-						maxActiveVideos: maxActiveVideos,
-						locked: locked,
-						chatEnabled: chatEnabled,
-						raiseHandEnabled: raiseHandEnabled,
-						filesharingEnabled: filesharingEnabled,
-						localRecordingEnabled: localRecordingEnabled,
-						breakoutsEnabled: breakoutsEnabled,
-						defaultRoleId: defaultRoleId
+				await client.reAuthenticate();
 
-					}
-				);
+				if (defaultRoleId==0) {
+					const log = await client.service(serviceName).create(
+						{ 
+							name: name,
+							description: description,
+							logo: logo,
+							background: background,
+							maxActiveVideos: maxActiveVideos,
+							locked: locked,
+							chatEnabled: chatEnabled,
+							raiseHandEnabled: raiseHandEnabled,
+							filesharingEnabled: filesharingEnabled,
+							localRecordingEnabled: localRecordingEnabled,
+							breakoutsEnabled: breakoutsEnabled
+						}
+					);
 
-				// eslint-disable-next-line no-console
-				console.log(log);
+					// eslint-disable-next-line no-console
+					console.log(log);
+				} else {
+					const log = await client.service(serviceName).create(
+						{ 
+							name: name,
+							description: description,
+							logo: logo,
+							background: background,
+							maxActiveVideos: maxActiveVideos,
+							locked: locked,
+							chatEnabled: chatEnabled,
+							raiseHandEnabled: raiseHandEnabled,
+							filesharingEnabled: filesharingEnabled,
+							localRecordingEnabled: localRecordingEnabled,
+							breakoutsEnabled: breakoutsEnabled,
+							defaultRoleId: defaultRoleId
+						}
+					);
+
+					// eslint-disable-next-line no-console
+					console.log(log);
+				}
 
 				fetchProduct();
 				setOpen(false);
@@ -444,25 +466,49 @@ const UserTable = () => {
 			try {
 				await client.reAuthenticate();
 				
-				const log = await client.service(serviceName).patch(
-					id,
-					{ 
-						description: description,
-						logo: logo,
-						background: background,
-						maxActiveVideos: maxActiveVideos,
-						locked: locked,
-						chatEnabled: chatEnabled,
-						raiseHandEnabled: raiseHandEnabled,
-						filesharingEnabled: filesharingEnabled,
-						localRecordingEnabled: localRecordingEnabled,
-						breakoutsEnabled: breakoutsEnabled,
-						defaultRoleId: defaultRoleId
-					}
-				);
+				if (defaultRoleId==0) {
+					const log = await client.service(serviceName).patch(
+						id,
+						{ 
+							name: name,
+							description: description,
+							logo: logo,
+							background: background,
+							maxActiveVideos: maxActiveVideos,
+							locked: locked,
+							chatEnabled: chatEnabled,
+							raiseHandEnabled: raiseHandEnabled,
+							filesharingEnabled: filesharingEnabled,
+							localRecordingEnabled: localRecordingEnabled,
+							breakoutsEnabled: breakoutsEnabled
+						}
+					);
 
-				// eslint-disable-next-line no-console
-				console.log(log);
+					// eslint-disable-next-line no-console
+					console.log(log);
+				} else {
+					const log = await client.service(serviceName).patch(
+						id,
+						{ 
+							name: name,
+							description: description,
+							logo: logo,
+							background: background,
+							maxActiveVideos: maxActiveVideos,
+							locked: locked,
+							chatEnabled: chatEnabled,
+							raiseHandEnabled: raiseHandEnabled,
+							filesharingEnabled: filesharingEnabled,
+							localRecordingEnabled: localRecordingEnabled,
+							breakoutsEnabled: breakoutsEnabled,
+							defaultRoleId: defaultRoleId
+						}
+					);
+
+					// eslint-disable-next-line no-console
+					console.log(log);
+				}
+
 				fetchProduct();
 				setOpen(false);
 				setAlertMessage('Successfull modify!');

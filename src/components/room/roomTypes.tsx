@@ -2,7 +2,6 @@ import { RoomOwners } from '../permission_stuff/permissionTypes';
 import Roles from '../roles/roleTypes';
 
 export type Room = {
-
 	id: number,
 	name: string,
 	description: string,
