@@ -41,7 +41,7 @@ async function main(): Promise<void> {
 		// console.log('showDashboard()');
     
 		// eslint-disable-next-line no-console
-		console.log(user.email);
+		console.log(user);
 		// eslint-disable-next-line no-console
 		// console.log('user.email2');
 

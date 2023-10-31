@@ -85,17 +85,17 @@ const UserTable = () => {
 
 			{
 				accessorKey: 'id',
-				header: 'id'
+				header: '#'
 			},
 			{
 				accessorKey: 'tenantId',
-				header: 'tenantId',
+				header: 'Tenant',
 				Cell: ({ cell }) => getTenantName(cell.getValue<string>())
 
 			},
 			{
 				accessorKey: 'userId',
-				header: 'userId',
+				header: 'User',
 				Cell: ({ cell }) => getUserEmail(cell.getValue<string>())
 
 			},

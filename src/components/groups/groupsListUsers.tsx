@@ -100,16 +100,16 @@ const UserTable = () => {
 
 			{
 				accessorKey: 'id',
-				header: 'id'
+				header: '#'
 			},
 			{
 				accessorKey: 'groupId',
-				header: 'groupId',
+				header: 'Group',
 				Cell: ({ cell }) => getGroupName(cell.getValue<string>())
 			},
 			{
 				accessorKey: 'userId',
-				header: 'userId',
+				header: 'User',
 				Cell: ({ cell }) => getUserEmail(cell.getValue<string>())
 
 			}

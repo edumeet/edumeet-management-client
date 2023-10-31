@@ -89,7 +89,7 @@ const UserTable = () => {
 
 			{
 				accessorKey: 'id',
-				header: 'id'
+				header: '#'
 			},
 			{
 				accessorKey: 'name',

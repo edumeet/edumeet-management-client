@@ -73,11 +73,11 @@ const UserTable = () => {
 
 			{
 				accessorKey: 'id',
-				header: 'id'
+				header: '#'
 			},
 			{
 				accessorKey: 'name',
-				header: 'name'
+				header: 'Name'
 			},
 			{
 				accessorKey: 'description',
@@ -85,13 +85,13 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'tenantId',
-				header: 'tenantId',
+				header: 'Tenant',
 				Cell: ({ cell }) => getTenantName(cell.getValue<string>())
 
 			},
 			{
 				accessorKey: 'permissions',
-				header: 'permissions',
+				header: 'Permission(s)',
 				Cell: ({ cell }) =>
 					(
 						cell.getValue<Array<Permissions>>().map((single: Permissions) => single.name)

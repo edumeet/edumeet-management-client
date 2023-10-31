@@ -124,17 +124,17 @@ const UserTable = () => {
 
 			{
 				accessorKey: 'id',
-				header: 'id'
+				header: '#'
 			},
 			{
 				accessorKey: 'roomId',
-				header: 'roomId',
+				header: 'Room',
 				Cell: ({ cell }) => getRoomName(cell.getValue<string>())
 
 			},
 			{
 				accessorKey: 'userId',
-				header: 'userId',
+				header: 'User',
 				Cell: ({ cell }) => getUserName(cell.getValue<string>())
 
 			},

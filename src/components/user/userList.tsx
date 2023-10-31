@@ -60,7 +60,7 @@ const UserTable = () => {
 
 			{
 				accessorKey: 'id',
-				header: 'id'
+				header: '#'
 			},
 			{
 				accessorKey: 'ssoId',
@@ -68,7 +68,7 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'tenantId',
-				header: 'tenantId',
+				header: 'Tenant',
 				Cell: ({ cell }) => getTenantName(cell.getValue<string>())
 
 			},
@@ -78,7 +78,7 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'name',
-				header: 'name'
+				header: 'Name'
 			},
 			{
 				accessorKey: 'avatar',

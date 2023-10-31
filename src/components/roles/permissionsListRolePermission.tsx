@@ -58,7 +58,7 @@ const UserTable = () => {
 
 			{
 				accessorKey: 'id',
-				header: 'id'
+				header: '#'
 			},
 			{
 				accessorKey: 'permission',
@@ -74,7 +74,7 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'roleId',
-				header: 'roleId'
+				header: 'Role'
 			},
 
 		],

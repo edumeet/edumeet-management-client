@@ -44,7 +44,7 @@ const TenantTable = () => {
 
 			{
 				accessorKey: 'id',
-				header: 'id'
+				header: '#'
 			},
 			{
 				accessorKey: 'name',
@@ -52,7 +52,7 @@ const TenantTable = () => {
 			},
 			{
 				accessorKey: 'description',
-				header: 'Desc'
+				header: 'description'
 			}
 		],
 		[],

@@ -59,37 +59,37 @@ const TenantTable = () => {
 
 			{
 				accessorKey: 'id',
-				header: 'id'
+				header: '#'
 			},
 			{
 				accessorKey: 'tenantId',
-				header: 'tenantId',
+				header: 'Tenant',
 				Cell: ({ cell }) => getTenantName(cell.getValue<string>())
 
 			},
 			{
 				accessorKey: 'access_url',
-				header: 'access_url'
+				header: 'Access URL'
 			},
 			{
 				accessorKey: 'authorize_url',
-				header: 'authorize_url'
+				header: 'Authorize URL'
 			},
 			{
 				accessorKey: 'profile_url',
-				header: 'profile_url'
+				header: 'Profile URL'
 			},
 			{
 				accessorKey: 'redirect_uri',
-				header: 'redirect_uri'
+				header: 'Redirect URI'
 			},
 			{
 				accessorKey: 'scope',
-				header: 'scope'
+				header: 'Scope'
 			},
 			{
 				accessorKey: 'scope_delimiter',
-				header: 'scope_delimiter'
+				header: 'Scope delimiter'
 			},
 			
 		],
@@ -334,7 +334,7 @@ const TenantTable = () => {
 					{alertMessage}
 				</Alert>
 			</Snackbar>
-			<Dialog open={open} onClose={handleClose}>
+			<Dialog maxWidth="lg" open={open} onClose={handleClose}>
 				<DialogTitle>Add/Edit</DialogTitle>
 				<DialogContent>
 					<DialogContentText>

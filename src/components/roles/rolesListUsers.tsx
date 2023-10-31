@@ -133,34 +133,35 @@ const UserTable = () => {
 		() => [
 			{
 				accessorKey: 'id',
-				header: 'id'
+				header: '#'
 			},
 			{
 				accessorKey: 'userId',
-				header: 'userId',
+				header: 'User',
 				Cell: ({ cell }) => getUserName(cell.getValue<string>())
 
 			},
 			{
 				accessorKey: 'roleId',
-				header: 'roleId',
+				header: 'Role',
 				Cell: ({ cell }) => getRoleName(cell.getValue<string>())
 
 			},
 			{
 				accessorKey: 'roomId',
-				header: 'roomId',
+				header: 'Room',
 				Cell: ({ cell }) => getRoomName(cell.getValue<string>())
 
 			},
-			{
+
+			/* {
 				accessorKey: 'role',
 				header: 'role',
 				Cell: ({ cell }) =>
 					(	
 						cell.getValue<Roles>().name
 					),
-			},
+			}, */
 		],
 		[ rooms, roles, users ],
 	);

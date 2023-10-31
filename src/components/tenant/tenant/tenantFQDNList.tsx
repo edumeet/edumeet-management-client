@@ -61,11 +61,11 @@ const TenantTable = () => {
 
 			{
 				accessorKey: 'id',
-				header: 'id'
+				header: '#'
 			},
 			{
 				accessorKey: 'tenantId',
-				header: 'tenantId',
+				header: 'Tenant',
 				Cell: ({ cell }) => getTenantName(cell.getValue<string>())
 
 			},
@@ -75,7 +75,7 @@ const TenantTable = () => {
 			},
 			{
 				accessorKey: 'fqdn',
-				header: 'fqdn'
+				header: 'Fully Qualified Domain Name (FQDN)'
 			},
 			
 		],
