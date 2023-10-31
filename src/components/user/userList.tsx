@@ -90,7 +90,7 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'tenantAdmin',
-				header: 'tenantAdmin',
+				header: 'Is tenant Admin?',
 				filterVariant: 'checkbox',
 				Cell: ({ cell }) =>
 					(cell.getValue() === true ? 'yes' : 'no'),
@@ -100,7 +100,7 @@ const UserTable = () => {
 				accessorKey: 'tenantOwner',
 				Cell: ({ cell }) =>
 					(cell.getValue() === true ? 'yes' : 'no'),
-				header: 'tenantOwner',
+				header: 'Is tenant owner?',
 				filterVariant: 'checkbox'
 			},
 		],

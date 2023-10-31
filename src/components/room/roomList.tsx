@@ -27,6 +27,7 @@ import { Roles, GroupRoles } from '../roles/roleTypes';
 import { Room } from './roomTypes';
 import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
 import { Tenant } from '../tenant/tenant/tenantTypes';
+import { User } from '../user/userTypes';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 
@@ -82,6 +83,30 @@ const UserTable = () => {
 		}
 	};
 
+	type UserTypes = Array<User>
+
+	const [ users, setUsers ] = useState<UserTypes>([ {
+		'id': 0,
+		'ssoId': '',
+		'tenantId': 0,
+		'email': '',
+		'name': '',
+		'avatar': '',
+		'roles': [],
+		'tenantAdmin': false,
+		'tenantOwner': false
+	} ]);
+
+	const getUserEmail = (id: number): string => {
+		const t = users.find((type) => type.id == id);
+
+		if (t && t.email) {
+			return t.email;
+		} else {
+			return 'no such email';
+		}
+	};
+
 	// should be memoized or stable
 	// eslint-disable-next-line camelcase
 	const columns = useMemo<MRT_ColumnDef<Room>[]>(
@@ -121,7 +146,7 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'tenantId',
-				header: 'Tenant id',
+				header: 'Tenant',
 				Cell: ({ cell }) => getTenantName(cell.getValue<string>())
 			},
 			{
@@ -178,7 +203,7 @@ const UserTable = () => {
 				header: 'owners',
 				Cell: ({ cell }) =>
 					(	
-						cell.getValue<Array<RoomOwners>>().map((single:RoomOwners) => single.userId)
+						cell.getValue<Array<RoomOwners>>().map((single:RoomOwners) => getUserEmail(single.userId))
 							.join(', ')
 					),
 			},
@@ -200,7 +225,7 @@ const UserTable = () => {
 			},
 			
 		],
-		[ tenants, roles ],
+		[ tenants, roles, users ],
 	);
 
 	const [ data, setData ] = useState([]);
@@ -232,6 +257,21 @@ const UserTable = () => {
 
 	async function fetchProduct() {
 		await client.reAuthenticate();
+		const u = await client.service('users').find(
+			{
+				query: {
+					$sort: {
+						id: 1
+					}
+				}
+			}
+		);
+
+		// eslint-disable-next-line no-console
+		console.log(u);
+
+		setUsers(u.data);
+
 		const t = await client.service('tenants').find(
 			{
 				query: {
