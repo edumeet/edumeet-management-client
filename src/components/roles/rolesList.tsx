@@ -226,11 +226,11 @@ const UserTable = () => {
 
 				// eslint-disable-next-line no-console
 				console.log(log);
-				fetchProduct();
-				setOpen(false);
 				setAlertMessage('Successfull delete!');
 				setAlertSeverity('success');
 				setAlertOpen(true);
+				fetchProduct();
+				setOpen(false);
 			} catch (error) {
 				if (error instanceof Error) {
 					setAlertMessage(error.toString());
@@ -258,6 +258,10 @@ const UserTable = () => {
 				// eslint-disable-next-line no-console
 				console.log(log);
 
+				setAlertMessage('Successfull add!');
+				setAlertSeverity('success');
+				setAlertOpen(true);
+				
 				fetchProduct();
 				setOpen(false);
 			} catch (error) {
@@ -281,9 +285,11 @@ const UserTable = () => {
 
 				// eslint-disable-next-line no-console
 				console.log(log);
+				setAlertMessage('Successfull modify!');
+				setAlertSeverity('success');
+				setAlertOpen(true);
 				fetchProduct();
 				setOpen(false);
-
 			} catch (error) {
 				if (error instanceof Error) {
 					setAlertMessage(error.toString());

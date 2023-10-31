@@ -14,7 +14,7 @@ gourps/users/rooms
 import { SyntheticEvent, useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Autocomplete } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Autocomplete, Snackbar } from '@mui/material';
 import React from 'react';
 
 import io from 'socket.io-client';
@@ -25,6 +25,7 @@ import edumeetConfig from '../../utils/edumeetConfig';
 import { GroupRoles, Roles } from '../roles/roleTypes';
 import { Room } from '../room/roomTypes';
 import Groups from './groupTypes';
+import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 
@@ -38,6 +39,16 @@ client.configure(authentication());
 
 const UserTable = () => {
 	const serviceName='roomGroupRoles';
+	const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+		props,
+		ref,
+	) {
+		return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+	});
+
+	const [ alertOpen, setAlertOpen ] = React.useState(false);
+	const [ alertMessage, setAlertMessage ] = React.useState('');
+	const [ alertSeverity, setAlertSeverity ] = React.useState<AlertColor>('success');
 
 	type RoomOptionTypes = Array<Room>
 
@@ -312,12 +323,17 @@ const UserTable = () => {
 
 				// eslint-disable-next-line no-console
 				console.log(log);
+				setAlertMessage('Successfull delete!');
+				setAlertSeverity('success');
+				setAlertOpen(true);
 				fetchProduct();
 				setOpen(false);
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		}
 	};
@@ -338,13 +354,17 @@ const UserTable = () => {
 
 				// eslint-disable-next-line no-console
 				console.log(log);
-
+				setAlertMessage('Successfull add!');
+				setAlertSeverity('success');
+				setAlertOpen(true);
 				fetchProduct();
 				setOpen(false);
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		} else if (id != 0) {
 			try {
@@ -360,16 +380,29 @@ const UserTable = () => {
 
 				// eslint-disable-next-line no-console
 				console.log(log);
+				setAlertMessage('Successfull modify!');
+				setAlertSeverity('success');
+				setAlertOpen(true);
 				fetchProduct();
 				setOpen(false);
 
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-				// if data already exists we cant add it TODO
+				if (error instanceof Error) {
+					setAlertMessage(error.toString());
+					setAlertSeverity('error');
+					setAlertOpen(true);
+				}
 			}
 		}
 
+	};
+
+	const handleAlertClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+		if (reason === 'clickaway') {
+			return;
+		}
+
+		setAlertOpen(false);
 	};
 
 	return <>
@@ -378,6 +411,11 @@ const UserTable = () => {
 				Add new
 			</Button>
 			<hr/>
+			<Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleAlertClose}>
+				<Alert onClose={handleAlertClose} severity={alertSeverity} sx={{ width: '100%' }}>
+					{alertMessage}
+				</Alert>
+			</Snackbar>
 			<Dialog open={open} onClose={handleClose}>
 				<DialogTitle>Add/Edit</DialogTitle>
 				<DialogContent>
