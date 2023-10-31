@@ -470,7 +470,6 @@ const UserTable = () => {
 					const log = await client.service(serviceName).patch(
 						id,
 						{ 
-							name: name,
 							description: description,
 							logo: logo,
 							background: background,
@@ -490,7 +489,6 @@ const UserTable = () => {
 					const log = await client.service(serviceName).patch(
 						id,
 						{ 
-							name: name,
 							description: description,
 							logo: logo,
 							background: background,
