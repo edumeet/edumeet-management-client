@@ -10,9 +10,11 @@ import Button from '@mui/material/Button';
 import edumeetConfig from '../../utils/edumeetConfig';
 
 import CssBaseline from '@mui/material/CssBaseline';
+import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
 
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { Snackbar } from '@mui/material';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 // Initialize our Feathers client application through Socket.io
@@ -27,6 +29,17 @@ client.configure(authentication());
 const defaultTheme = createTheme();
 
 export default function SignIn() {
+
+	const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+		props,
+		ref,
+	) {
+		return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+	});
+	const [ alertOpen, setAlertOpen ] = React.useState(false);
+	const [ alertMessage, setAlertMessage ] = React.useState('');
+	const [ alertSeverity, setAlertSeverity ] = React.useState<AlertColor>('success');
+
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const data = new FormData(event.currentTarget);
@@ -41,16 +54,35 @@ export default function SignIn() {
 				email: email,
 				password: password
 			});
+			setAlertMessage('Successfull delete!');
+			setAlertSeverity('success');
+			setAlertOpen(true);
 			// Show e.g. logged in dashboard page
 			window.location.reload();
 		} catch (error) {
-			// Show login page (potentially with `e.message`)
+			if (error instanceof Error) {
+				setAlertMessage(error.toString());
+				setAlertSeverity('error');
+				setAlertOpen(true);
+			}
 		}
 		
 	};
-
+	const handleAlertClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+		if (reason === 'clickaway') {
+			return;
+		}
+  
+		setAlertOpen(false);
+	};
+	
 	return (
 		<ThemeProvider theme={defaultTheme}>
+			<Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleAlertClose}>
+				<Alert onClose={handleAlertClose} severity={alertSeverity} sx={{ width: '100%' }}>
+					{alertMessage}
+				</Alert>
+			</Snackbar>
 			<Container component="main" maxWidth="xs">
 				<CssBaseline />
 				<Box
