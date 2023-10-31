@@ -22,9 +22,9 @@ import { feathers } from '@feathersjs/feathers';
 import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../../utils/edumeetConfig';
-import { GroupRoles, Roles } from './roleTypes';
+import { GroupRoles, Roles } from '../roles/roleTypes';
 import { Room } from '../room/roomTypes';
-import Groups from '../groups/groupTypes';
+import Groups from './groupTypes';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 

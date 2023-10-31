@@ -1,6 +1,7 @@
 import TenantDesc from './description';
 import TenantTable from './groupsList';
 import TenantTable2 from './groupsListUsers';
+import TenantTable3 from '../groups/rolesListGroups';
 
 const TenantPage = () => {
 	
@@ -11,6 +12,10 @@ const TenantPage = () => {
 		<hr/>
 		<h1>GroupsUsers</h1>
 		<TenantTable2 />
+		<hr/>
+		<h1>GroupRoles</h1>
+		<TenantTable3 />
+		<hr/>
 	</>;
 };
 
