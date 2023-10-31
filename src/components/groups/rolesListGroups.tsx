@@ -481,7 +481,6 @@ const UserTable = () => {
 						setRoomIdOption(undefined);
 					}
 
-
 					handleClickOpenNoreset();
 
 				}

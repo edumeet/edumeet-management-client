@@ -11,10 +11,10 @@ gourps/users/rooms
 
 */
 
-import { useEffect, useMemo, useState } from 'react';
+import { SyntheticEvent, useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Snackbar } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Snackbar, Autocomplete } from '@mui/material';
 import React from 'react';
 import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
 
@@ -24,6 +24,8 @@ import socketio from '@feathersjs/socketio-client';
 import authentication from '@feathersjs/authentication-client';
 import edumeetConfig from '../../utils/edumeetConfig';
 import { RoomOwners } from '../permission_stuff/permissionTypes';
+import User from '../user/userTypes';
+import { Room } from '../room/roomTypes';
 
 const socket = io(edumeetConfig.hostname, { path: edumeetConfig.path });
 
@@ -47,9 +49,73 @@ const UserTable = () => {
 		return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 	});
 
+	type RoomOptionTypes = Array<Room>
+
+	// nested data is ok, see accessorKeys in ColumnDef below
+	const [ rooms, setRooms ] = useState<RoomOptionTypes>([ {
+		'id': 1,
+		'name': '',
+		'description': '',
+		'createdAt': '',
+		'updatedAt': '',
+		'creatorId': '',
+		'defaultRoleId': '',
+		'tenantId': 1,
+		'logo': null,
+		'background': null,
+		'maxActiveVideos': 0,
+		'locked': true,
+		'chatEnabled': true,
+		'raiseHandEnabled': true,
+		'filesharingEnabled': true,
+		'groupRoles': [],
+		'localRecordingEnabled': true,
+		'owners': [],
+		'breakoutsEnabled': true,
+	}
+	]);
+
+	type UsersOptionTypes = Array<User>
+
+	// nested data is ok, see accessorKeys in ColumnDef below
+	const [ users, setUsers ] = useState<UsersOptionTypes>([ {
+		'id': 0,
+		'ssoId': '',
+		'tenantId': 0,
+		'email': '',
+		'name': '',
+		'avatar': '',
+		'roles': [],
+		'tenantAdmin': false,
+		'tenantOwner': false
+	}
+	]);
+
 	const [ alertOpen, setAlertOpen ] = React.useState(false);
 	const [ alertMessage, setAlertMessage ] = React.useState('');
 	const [ alertSeverity, setAlertSeverity ] = React.useState<AlertColor>('success');
+
+	const getUserName = (id: string): string => {
+		const t = users.find((type) => type.id === parseInt(id));
+	
+		if (t && t.email) {
+			return t.email;
+		} else {
+			return 'undefined user';
+		}
+	};
+
+	// nested data is ok, see accessorKeys in ColumnDef below
+	
+	const getRoomName = (id: string): string => {
+		const t = rooms.find((type) => type.id === parseInt(id));
+	
+		if (t && t.name) {
+			return t.name;
+		} else {
+			return 'undefined room';
+		}
+	};
 
 	// should be memoized or stable
 	// eslint-disable-next-line camelcase
@@ -62,26 +128,66 @@ const UserTable = () => {
 			},
 			{
 				accessorKey: 'roomId',
-				header: 'roomId'
+				header: 'roomId',
+				Cell: ({ cell }) => getRoomName(cell.getValue<string>())
+
 			},
 			{
 				accessorKey: 'userId',
-				header: 'userId'
+				header: 'userId',
+				Cell: ({ cell }) => getUserName(cell.getValue<string>())
+
 			},
+			
 		],
-		[],
+		[ rooms, users ],
 	);
 
 	const [ data, setData ] = useState([]);
 	const [ isLoading, setIsLoading ] = useState(false);
 	const [ id, setId ] = useState(0);
 	const [ cantPatch, setcantPatch ] = useState(false);
+	const [ userIdOption, setUserIdOption ] = useState<User | undefined>();
+	const [ roomIdOption, setRoomIdOption ] = useState<Room | undefined>();
+	const [ userIdOptionDisabled, setUserIdOptionDisabled ] = useState(true);
+	const [ roomIdOptionDisabled, setRoomIdOptionDisabled ] = useState(true);
 	
 	const [ roomId, setRoomId ] = useState(0);
 	const [ userId, setUserId ] = useState(0);
 
 	async function fetchProduct() {
 		await client.reAuthenticate();
+		const u = await client.service('users').find(
+			{
+				query: {
+					$sort: {
+						id: 1
+					}
+				}
+			}
+		);
+
+		// eslint-disable-next-line no-console
+		console.log('u');
+		// eslint-disable-next-line no-console
+		console.log(u);
+		setUsers(u.data);
+		
+		const r = await client.service('rooms').find(
+			{
+				query: {
+					$sort: {
+						id: 1
+					}
+				}
+			}
+		);
+
+		// eslint-disable-next-line no-console
+		console.log('r');
+		// eslint-disable-next-line no-console
+		console.log(r);
+		setRooms(r.data);
 		// Find all users
 		const user = await client.service(serviceName).find(
 			{
@@ -115,21 +221,32 @@ const UserTable = () => {
 		setId(0);
 		setRoomId(0);
 		setUserId(0);
+		setUserIdOption(undefined);
+		setRoomIdOption(undefined);
+		setUserIdOptionDisabled(false);
+		setRoomIdOptionDisabled(false);
 		setcantPatch(false);
 		setOpen(true);
 	};
 
 	const handleClickOpenNoreset = () => {
+		setUserIdOptionDisabled(true);
+		setRoomIdOptionDisabled(true);
 		setcantPatch(true);
 		setOpen(true);
 	};
 
-	const handleRoomIdChange = (event: { target: { value: string; }; }) => {
-		setRoomId(parseInt(event.target.value));
+	const handleUserIdChange = (event: SyntheticEvent<Element, Event>, newValue: User) => {
+		if (newValue) {
+			setUserId(newValue.id);
+			setUserIdOption(newValue);
+		}
 	};
-
-	const handleUserIdChange = (event: { target: { value: string; }; }) => {
-		setUserId(parseInt(event.target.value));
+	const handleRoomIdChange = (event: SyntheticEvent<Element, Event>, newValue: Room) => {
+		if (newValue) {
+			setRoomId(newValue.id);
+			setRoomIdOption(newValue);
+		}
 	};
 
 	const handleClose = () => {
@@ -240,29 +357,28 @@ const UserTable = () => {
 						These are the parameters that you can change.
 					</DialogContentText>
 					<input type="hidden" name="id" value={id} />
-					<TextField
-						autoFocus
-						margin="dense"
-						id="roomId"
-						label="roomId"
-						type="number"
-						required
+					<Autocomplete
+						options={rooms}
+						getOptionLabel={(option) => option.name}
 						fullWidth
+						disableClearable
+						readOnly={roomIdOptionDisabled}
 						onChange={handleRoomIdChange}
-						value={roomId}
+						value={roomIdOption}
+						sx={{ marginTop: '8px' }}
+						renderInput={(params) => <TextField {...params} label="Room" />}
 					/>
-					<TextField
-						autoFocus
-						margin="dense"
-						id="userId"
-						label="userId"
-						type="number"
-						required
+					<Autocomplete
+						options={users}
+						getOptionLabel={(option) => option.email}
 						fullWidth
+						disableClearable
+						readOnly={userIdOptionDisabled}
 						onChange={handleUserIdChange}
-						value={userId}
+						value={userIdOption}
+						sx={{ marginTop: '8px' }}
+						renderInput={(params) => <TextField {...params} label="User" />}
 					/>
-
 				</DialogContent>
 				<DialogActions>
 					<Button onClick={delTenant} color='warning'>Delete</Button>
@@ -284,15 +400,28 @@ const UserTable = () => {
 					if (typeof tid === 'number') {
 						setId(tid);
 					}
-					if (typeof troomId === 'string') {
-						setRoomId(parseInt(troomId));
-					} else {
-						setRoomId(0);
-					}
 					if (typeof tuserId === 'string') {
+						const tuser = users.find((x) => x.id === parseInt(tuserId));
+
+						if (tuser) {
+							setUserIdOption(tuser);
+						}
 						setUserId(parseInt(tuserId));
 					} else {
 						setUserId(0);
+						setUserIdOption(undefined);
+					}
+					
+					if (typeof troomId === 'string') {
+						const troom = rooms.find((x) => x.id === parseInt(troomId));
+
+						if (troom) {
+							setRoomIdOption(troom);
+						}
+						setRoomId(parseInt(troomId));
+					} else {
+						setRoomId(0);
+						setRoomIdOption(undefined);
 					}
 
 					handleClickOpenNoreset();
