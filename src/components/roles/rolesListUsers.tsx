@@ -501,8 +501,8 @@ const UserTable = () => {
 						}
 						setRoleId(parseInt(troleId));
 					} else {
-						setUserId(0);
-						setUserIdOption(undefined);
+						setRoleId(0);
+						setRoleIdOption(undefined);
 					}
 					if (typeof troomId === 'string') {
 						const troom = rooms.find((x) => x.id === parseInt(troomId));
