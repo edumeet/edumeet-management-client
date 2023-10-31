@@ -11,10 +11,10 @@ gourps/users/rooms
 
 */
 
-import { useEffect, useMemo, useState } from 'react';
+import { SyntheticEvent, useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line camelcase
 import MaterialReactTable, { type MRT_ColumnDef } from 'material-react-table';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Autocomplete } from '@mui/material';
 import React from 'react';
 
 import io from 'socket.io-client';
@@ -163,6 +163,13 @@ const UserTable = () => {
 	const [ roleId, setRoleId ] = useState(0);
 	const [ roomId, setRoomId ] = useState(0);
 
+	const [ groupIdOption, setGroupIdOption ] = useState<Groups | undefined>();
+	const [ roleIdOption, setRoleIdOption ] = useState<Roles | undefined>();
+	const [ roomIdOption, setRoomIdOption ] = useState<Room | undefined>();
+	const [ groupIdOptionDisabled, setGroupIdOptionDisabled ] = useState(true);
+	const [ roleIdOptionDisabled, setRoleIdOptionDisabled ] = useState(true);
+	const [ roomIdOptionDisabled, setRoomIdOptionDisabled ] = useState(true);
+
 	const [ cantPatch, setCantPatch ] = useState(true);
 	const [ cantDelete ] = useState(false);
 
@@ -250,23 +257,41 @@ const UserTable = () => {
 		setGroupId(0);
 		setRoleId(0);
 		setRoomId(0);
+		setGroupIdOption(undefined);
+		setRoleIdOption(undefined);
+		setRoomIdOption(undefined);
+		setGroupIdOptionDisabled(false);
+		setRoleIdOptionDisabled(false);
+		setRoomIdOptionDisabled(false);
 		setCantPatch(false);
 		setOpen(true);
 	};
 
 	const handleClickOpenNoreset = () => {
+		setGroupIdOptionDisabled(true);
+		setRoleIdOptionDisabled(true);
+		setRoomIdOptionDisabled(true);
 		setCantPatch(true);
 		setOpen(true);
 	};
 
-	const handleGroupIdChange = (event: { target: { value: string; }; }) => {
-		setGroupId(parseInt(event.target.value));
+	const handleGroupIdChange = (event: SyntheticEvent<Element, Event>, newValue: Groups) => {
+		if (newValue) {
+			setGroupId(newValue.id);
+			setGroupIdOption(newValue);
+		}
 	};
-	const handleRoleIdChange = (event: { target: { value: string; }; }) => {
-		setRoleId(parseInt(event.target.value));
+	const handleRoleIdChange = (event: SyntheticEvent<Element, Event>, newValue: Roles) => {
+		if (newValue) {
+			setRoleId(newValue.id);
+			setRoleIdOption(newValue);
+		}
 	};
-	const handleRoomIdChange = (event: { target: { value: string; }; }) => {
-		setRoomId(parseInt(event.target.value));
+	const handleRoomIdChange = (event: SyntheticEvent<Element, Event>, newValue: Room) => {
+		if (newValue) {
+			setRoomId(newValue.id);
+			setRoomIdOption(newValue);
+		}
 	};
 
 	const handleClose = () => {
@@ -359,38 +384,38 @@ const UserTable = () => {
 						These are the parameters that you can change.
 					</DialogContentText>
 					<input type="hidden" name="id" value={id} />
-					<TextField
-						autoFocus
-						margin="dense"
-						id="groupId"
-						label="groupId"
-						type="number"
-						required
+					<Autocomplete
+						options={groups}
+						getOptionLabel={(option) => option.name}
 						fullWidth
+						disableClearable
+						readOnly={groupIdOptionDisabled}
 						onChange={handleGroupIdChange}
-						value={groupId}
+						value={groupIdOption}
+						sx={{ marginTop: '8px' }}
+						renderInput={(params) => <TextField {...params} label="User" />}
 					/>
-					<TextField
-						autoFocus
-						margin="dense"
-						id="roleId"
-						label="roleId"
-						type="number"
-						required
+					<Autocomplete
+						options={roles}
+						getOptionLabel={(option) => option.name}
 						fullWidth
+						disableClearable
+						readOnly={roleIdOptionDisabled}
 						onChange={handleRoleIdChange}
-						value={roleId}
+						value={roleIdOption}
+						sx={{ marginTop: '8px' }}
+						renderInput={(params) => <TextField {...params} label="Role" />}
 					/>
-					<TextField
-						autoFocus
-						margin="dense"
-						id="roomId"
-						label="roomId"
-						type="number"
-						required
+					<Autocomplete
+						options={rooms}
+						getOptionLabel={(option) => option.name}
 						fullWidth
+						disableClearable
+						readOnly={roomIdOptionDisabled}
 						onChange={handleRoomIdChange}
-						value={roomId}
+						value={roomIdOption}
+						sx={{ marginTop: '8px' }}
+						renderInput={(params) => <TextField {...params} label="Room" />}
 					/>
 					
 				</DialogContent>
@@ -420,16 +445,42 @@ const UserTable = () => {
 					} else {
 						setGroupId(0);
 					}
+
+					if (typeof tgroupId === 'string') {
+						const tgroup = groups.find((x) => x.id === parseInt(tgroupId));
+
+						if (tgroup) {
+							setGroupIdOption(tgroup);
+						}
+						setGroupId(parseInt(tgroupId));
+					} else {
+						setGroupId(0);
+						setGroupIdOption(undefined);
+					}
+
 					if (typeof troleId === 'string') {
+						const troles = roles.find((x) => x.id === parseInt(troleId));
+
+						if (troles) {
+							setRoleIdOption(troles);
+						}
 						setRoleId(parseInt(troleId));
 					} else {
 						setRoleId(0);
+						setRoleIdOption(undefined);
 					}
 					if (typeof troomId === 'string') {
+						const troom = rooms.find((x) => x.id === parseInt(troomId));
+
+						if (troom) {
+							setRoomIdOption(troom);
+						}
 						setRoomId(parseInt(troomId));
 					} else {
 						setRoomId(0);
+						setRoomIdOption(undefined);
 					}
+
 
 					handleClickOpenNoreset();
 
