@@ -31,7 +31,7 @@ import RoleTable from './roles/roles';
 // import PermissionTable from './permission_stuff/permissions';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+// import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
@@ -138,14 +138,14 @@ export default function ResponsiveDrawer(props: Props) {
 						<ListItemText primary={'Groups'} />
 					</ListItemButton>
 				</ListItem>
-				<ListItem button component={Link} to={`${edumeetConfig.clipath}permissions`} key={'Permissions(s)'} disablePadding>
+				{/* <ListItem button component={Link} to={`${edumeetConfig.clipath}permissions`} key={'Permissions(s)'} disablePadding>
 					<ListItemButton >
 						<ListItemIcon>
 							<ManageAccountsIcon />
 						</ListItemIcon>
 						<ListItemText primary={'Permissions'} />
 					</ListItemButton>
-				</ListItem>
+				</ListItem> */}
 				<ListItem button component={Link} to={`${edumeetConfig.clipath}roles`} key={'Role(s)'} disablePadding>
 					<ListItemButton >
 						<ListItemIcon>
