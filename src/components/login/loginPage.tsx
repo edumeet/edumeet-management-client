@@ -93,7 +93,7 @@ export default function SignIn() {
 						alignItems: 'center',
 					}}
 				>
-					<img src='https://raw.githubusercontent.com/edumeet/edumeet/master/app/public/images/logo.edumeet.svg' />
+					<img src='/images/logo.edumeet.svg' />
 
 					<Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
 						<TextField
