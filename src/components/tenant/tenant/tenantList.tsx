@@ -158,7 +158,7 @@ const TenantTable = () => {
 
 				fetchProduct();
 				setOpen(false);
-				setAlertMessage('Successfull add!');
+				setAlertMessage('Successfull add! (please reload page)');
 				setAlertSeverity('success');
 				setAlertOpen(true);
 			} catch (error) {
