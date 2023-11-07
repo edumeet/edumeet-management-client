@@ -141,6 +141,7 @@ const TenantTable = () => {
 	const handleClickOpen = () => {
 		setId(0);
 		setTenantId(0);
+		setTenantIdOption(undefined);
 		setDescription('');
 		setFQDN('');
 		setOpen(true);
@@ -285,7 +286,6 @@ const TenantTable = () => {
 						getOptionLabel={(option) => option.name}
 						fullWidth
 						disableClearable
-						id="combo-box-demo"
 						onChange={handleTenantIdChange}
 						value={tenantIdOption}
 						sx={{ marginTop: '8px' }}
