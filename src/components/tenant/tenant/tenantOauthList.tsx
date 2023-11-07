@@ -167,6 +167,8 @@ const TenantTable = () => {
 		setAccessUrl('https://edumeet.example.com/kc/realms/<realm>/protocol/openid-connect/token');
 		setScope('openid profile email');
 		setScopeDelimeter(' ');
+		setTenantIdOption(undefined);
+		setTenantId(0);
 		setRedirect('https://edumeet.example.com/mgmt/oauth/tenant/callback');
 		setOpen(true);
 	};
@@ -357,7 +359,6 @@ const TenantTable = () => {
 						getOptionLabel={(option) => option.name}
 						fullWidth
 						disableClearable
-						id="combo-box-demo"
 						onChange={handleTenantIdChange}
 						value={tenantIdOption}
 						sx={{ marginTop: '8px' }}
