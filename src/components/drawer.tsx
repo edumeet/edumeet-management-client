@@ -249,12 +249,12 @@ export default function ResponsiveDrawer(props: Props) {
 				
 					<Routes>
 
-						<Route path="/cli/" Component={LoginLayout} />
-						<Route path="/cli/room" Component={RoomTable} />
-						<Route path="/cli/tenant" Component={TenantPage} />
-						<Route path="/cli/users" Component={UserTable} />
-						<Route path="/cli/groups" Component={GroupTable} />
-						<Route path="/cli/roles" Component={RoleTable} />
+						<Route path={`${edumeetConfig.clipath}`} Component={LoginLayout} />
+						<Route path={`${edumeetConfig.clipath}room`} Component={RoomTable} />
+						<Route path={`${edumeetConfig.clipath}tenant`} Component={TenantPage} />
+						<Route path={`${edumeetConfig.clipath}users`} Component={UserTable} />
+						<Route path={`${edumeetConfig.clipath}groups`} Component={GroupTable} />
+						<Route path={`${edumeetConfig.clipath}roles`} Component={RoleTable} />
 						{/* <Route path="/cli/permissions" Component={PermissionTable} /> */}
 						<Route path="/cli/products/:id" Component={Product} />
 					</Routes>

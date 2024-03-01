@@ -31,9 +31,6 @@ client.configure(authentication());
 
 async function main(): Promise<void> {
 	try {
-		// eslint-disable-next-line no-console
-		console.log('user.email');
-
 		const { user } = await client.reAuthenticate();
 
 		// const { user } = await client.reAuthenticate();
