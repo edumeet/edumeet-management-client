@@ -101,6 +101,9 @@ const TenantTable = () => {
 	const [ id, setId ] = useState(0);
 	const [ tenantId, setTenantId ] = useState(0);
 	const [ profileUrl, setProfileUrl ] = useState('');
+	const [ wellknown, setWellknown ] = useState('');
+	const [ wellknownEpmty, setWellknownEmpty ] = useState(true);
+
 	const [ key, setKey ] = useState('');
 	const [ secret, setSecret ] = useState('');
 	const [ authorizeUrl, setAuthorizeUrl ] = useState('');
@@ -188,6 +191,46 @@ const TenantTable = () => {
 		setProfileUrl(event.target.value);
 	};
 
+	const handleWellknownChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
+		setWellknown(event.target.value);
+		if (event.target.value != null && event.target.value.length > 10) {
+			setWellknownEmpty(false);
+		} else {
+			setWellknownEmpty(true);
+		}
+
+	};
+	
+	const handleWellknownUpdate = () => {
+
+		fetch(wellknown, {
+			method: 'GET',
+		}).then(async (response) => {
+			if (!response.ok) {
+				setAlertMessage(response.statusText.toString());
+				setAlertSeverity('error');
+				setAlertOpen(true);
+			} else {
+				const json = await response.json(); // assuming they return json
+
+				if (json.token_endpoint!=null)
+					setAccessUrl(json.token_endpoint);
+				if (json.authorization_endpoint!=null)
+					setAuthorizeUrl(json.authorization_endpoint);
+				if (json.userinfo_endpoint!=null)
+					setProfileUrl(json.userinfo_endpoint);
+
+			}
+			
+		})
+			.catch((error) => {
+				setAlertMessage(error.toString());
+				setAlertSeverity('error');
+				setAlertOpen(true);
+			});
+
+	};
+	
 	const handleKeyChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
 		setKey(event.target.value);
 	};
@@ -364,7 +407,17 @@ const TenantTable = () => {
 						sx={{ marginTop: '8px' }}
 						renderInput={(params) => <TextField {...params} label="Tenant" />}
 					/>
-					
+					<TextField
+						margin="dense"
+						required
+						id="wellknown"
+						label="Well-known URL"
+						type="text"
+						fullWidth
+						value={wellknown}
+						onChange={handleWellknownChange}
+					/>
+					<Button onClick={handleWellknownUpdate} variant="contained" fullWidth disabled={wellknownEpmty} >Update parameters from URL</Button>
 					<TextField
 						margin="dense"
 						required
